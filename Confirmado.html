@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Confirmando...</title>
+</head>
+<body>
+  <p>Confirmando seu cadastro...</p>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+
+    fetch(`/api/confirm-email?token=${token}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = '/dashboard';
+        } else {
+          document.body.innerHTML = "<h2>Token inválido ou expirado</h2>";
+        }
+      })
+      .catch(() => {
+        document.body.innerHTML = "<h2>Erro ao confirmar</h2>";
+      });
+  </script>
+</body>
+</html>
