@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Nova Senha</title>
+</head>
+<body>
+
+<h3>Definir Nova Senha</h3>
+
+<form id="form">
+
+  <label>Nova Senha:</label><br>
+  <input type="password" id="nova" required><br><br>
+
+  <label>Confirmar Senha:</label><br>
+  <input type="password" id="confirmar" required><br><br>
+
+  <button type="submit">Salvar</button>
+
+</form>
+
+<p id="msg"></p>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+const token = params.get("token");
+
+function senhaForte(senha) {
+  return senha.length >= 8 &&
+         /[A-Z]/.test(senha) &&
+         /[a-z]/.test(senha) &&
+         /[0-9]/.test(senha) &&
+         /[\W]/.test(senha);
+}
+
+document.getElementById("form").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  let nova = document.getElementById("nova").value;
+  let confirmar = document.getElementById("confirmar").value;
+  let msg = document.getElementById("msg");
+
+  if (!token) {
+    msg.innerText = "Token inválido ou ausente";
+    return;
+  }
+
+  if (nova !== confirmar) {
+    msg.innerText = "As senhas não coincidem";
+    return;
+  }
+
+  if (!senhaForte(nova)) {
+    msg.innerText = "Senha fraca";
+    return;
+  }
+  console.log({
+    token: token,
+    novaSenha: nova
+  });
+
+  msg.innerText = "Senha redefinida (simulação)";
+});
+
+</script>
+
+</body>
+</html>
