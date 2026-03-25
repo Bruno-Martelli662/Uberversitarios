@@ -1,0 +1,198 @@
+/* =========================
+   ROOT / THEME
+========================= */
+:root {
+  --primary: #ff5a5f;
+  --secondary: #ff7a18;
+  --gradient: linear-gradient(135deg, #ff5a5f, #ff7a18);
+
+  --bg: #f8f9fb;
+  --white: #ffffff;
+  --text: #333;
+  --text-light: #777;
+
+  --radius: 20px;
+  --shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* =========================
+   RESET
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* =========================
+   LAYOUT
+========================= */
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
+
+.section {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+/* =========================
+   HEADER
+========================= */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 60px;
+  position: relative;
+}
+
+.header::after {
+  content: "";
+  position: absolute;
+  right: -150px;
+  top: -150px;
+  width: 450px;
+  height: 450px;
+  background: var(--gradient);
+  border-radius: 50%;
+  opacity: 0.9;
+  z-index: 0;
+}
+
+.logo {
+  width: 320px;
+  z-index: 1;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+.btn {
+  padding: 12px 25px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.btn-primary {
+  background: var(--gradient);
+  color: white;
+}
+
+.btn-primary:hover {
+  opacity: 0.85;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-outline:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* =========================
+   TEXT
+========================= */
+.title {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  color: var(--text-light);
+  max-width: 600px;
+  margin: auto;
+}
+
+/* =========================
+   CARDS (RIDES)
+========================= */
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.card {
+  width: 220px;
+  background: white;
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  transition: 0.3s;
+  position: relative;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 5px;
+  width: 100%;
+  background: var(--gradient);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+}
+
+/* =========================
+   FORMS (LOGIN / SIGNUP)
+========================= */
+.form-container {
+  max-width: 400px;
+  margin: 80px auto;
+  background: white;
+  padding: 40px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.form-container h2 {
+  margin-bottom: 20px;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.input-group input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* =========================
+   FOOTER
+========================= */
+footer {
+  background: #1f1f1f;
+  color: #ccc;
+  text-align: center;
+  padding: 25px;
+  margin-top: 60px;
+}
