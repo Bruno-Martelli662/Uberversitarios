@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <title>Uberversitários</title>
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- Fonte -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Global CSS -->
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -19,30 +19,45 @@
 
     <div>
       <button class="btn btn-outline" onclick="goLogin()">Login</button>
-      <button class="btn btn-primary" onclick="goRegister()">Cadastro</button>
+      <button class="btn btn-primary" onclick="goCadastro()">Cadastro</button>
+      <button class="btn btn-primary big" onclick="goViagems()">Ver/criar viagens</button>
     </div>
   </header>
 
-  <!-- HERO / INTRO -->
-  <section class="section">
-    <h1 class="title">Compartilhe viagens com universitários</h1>
-    <p class="subtitle">
-      Uma plataforma simples e segura para oferecer ou encontrar caronas entre estudantes.
+  <!-- HERO (principal, estilo Uber moderno) -->
+  <section class="hero">
+    <h1>Compartilhe sua carona na universidade</h1>
+
+    <p>
+      Uma plataforma simples, rápida e segura para encontrar ou oferecer caronas entre estudantes.
     </p>
+
+    
   </section>
 
-  <!-- CONTENT TEXT -->
+  <!-- COMO FUNCIONA -->
   <section class="container">
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-    </p>
-    <br>
-    <p>
-      Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-    </p>
+    <h2 class="title">Como funciona</h2>
+
+    <div class="cards">
+      <div class="card">
+        <h4>Crie sua conta</h4>
+        <p>Cadastre-se rapidamente e comece a usar a plataforma.</p>
+      </div>
+
+      <div class="card">
+        <h4>Encontre ou ofereça</h4>
+        <p>Veja viagens disponíveis ou publique a sua.</p>
+      </div>
+
+      <div class="card">
+        <h4>Viaje com segurança</h4>
+        <p>Conecte-se apenas com estudantes da sua universidade.</p>
+      </div>
+    </div>
   </section>
 
-  <!-- CARDS -->
+  <!-- VIAGENS -->
   <section class="container">
     <h2 class="title">Viagens disponíveis</h2>
 
@@ -53,25 +68,31 @@
 
   <!-- FOOTER -->
   <footer>
-    <p>Contato: contato@site.com</p>
-    <p>Responsáveis: João / Maria</p>
+    <p>Contato: uberversitarios@gmail.com</p>
+    <p>Privacidade e dados: (41) 98765-4321</p>
+    <p>DPO: Arthur Trem em ingles</p>
   </footer>
 
+  <!-- SCRIPT -->
   <script>
     function goLogin() {
-      window.location.href = "/login";
+      window.location.href = "Uberversitarios/login.html";
     }
 
-    function goRegister() {
-      window.location.href = "/cadastro";
+    function goCadastro() {
+      window.location.href = "Uberversitarios/cadastro.html";
     }
 
-    // Simulação de dados
+    function goViagems() {
+      window.location.href = "Uberversitarios/viagems.html";
+    }
+
+    // Dados simulados (mais realistas agora)
     const viagens = [
-      { destino: "Paris", preco: "R$ 4.000" },
-      { destino: "Roma", preco: "R$ 3.500" },
-      { destino: "Nova York", preco: "R$ 5.200" },
-      { destino: "Tóquio", preco: "R$ 6.000" }
+      { destino: "Centro", preco: "R$ 10" },
+      { destino: "Campus", preco: "R$ 8" },
+      { destino: "Terminal", preco: "R$ 12" },
+      { destino: "Shopping", preco: "R$ 15" }
     ];
 
     const container = document.getElementById("cardsContainer");
@@ -83,6 +104,7 @@
       card.innerHTML = `
         <h4>${v.destino}</h4>
         <p>${v.preco}</p>
+        <button class="btn btn-primary small">Entrar</button>
       `;
 
       container.appendChild(card);

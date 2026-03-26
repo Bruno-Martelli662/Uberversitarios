@@ -1,0 +1,239 @@
+/* =========================
+   ROOT / THEME
+========================= */
+:root {
+  --primary: #ff5a5f;
+  --secondary: #ff7a18;
+  --gradient: linear-gradient(135deg, #ff5a5f, #ff7a18);
+
+  --bg: #ffffff;
+  --white: #ffffff;
+  --text: #333;
+  --text-light: #777;
+
+  --radius: 20px;
+  --shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* =========================
+   RESET
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* =========================
+   BODY + FUNDO ESTILIZADO
+========================= */
+body {
+  font-family: 'Poppins', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* BOLHA GRADIENTE (igual à logo) */
+body::after {
+  content: "";
+  position: fixed;
+  right: -200px;
+  top: -200px;
+  width: 600px;
+  height: 600px;
+  background: var(--gradient);
+  border-radius: 50%;
+  opacity: 0.9;
+  z-index: -1;
+}
+
+/* =========================
+   LAYOUT
+========================= */
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
+
+.section {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+/* =========================
+   HEADER
+========================= */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 80px;
+}
+
+.logo {
+  width: 300px;
+}
+
+/* =========================
+   HERO
+========================= */
+.hero {
+  padding: 120px 80px;
+  max-width: 1100px;
+  margin: auto;
+}
+
+.hero h1 {
+  font-size: 48px;
+  font-weight: 700;
+  background: var(--gradient);
+  -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+  font-size: 18px;
+  margin: 20px 0;
+  color: var(--text-light);
+}
+
+/* =========================
+   BUTTONS
+========================= */
+.btn {
+  padding: 12px 25px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.btn-primary {
+  background: var(--gradient);
+  color: white;
+  box-shadow: 0 8px 20px rgba(255, 90, 95, 0.4);
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-outline:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* TAMANHOS */
+.big {
+  padding: 15px 35px;
+  font-size: 16px;
+}
+
+.small {
+  margin-top: 10px;
+  padding: 8px 15px;
+  font-size: 14px;
+}
+
+/* =========================
+   TEXT
+========================= */
+.title {
+  font-size: 36px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  color: var(--text-light);
+  max-width: 600px;
+  margin: auto;
+}
+
+/* =========================
+   CARDS (RIDES)
+========================= */
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.card {
+  width: 250px;
+  background: white;
+  border-radius: var(--radius);
+  padding: 25px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+  transition: 0.3s;
+  text-align: center;
+  border-top: 5px solid transparent;
+}
+
+.card h4 {
+  margin-bottom: 10px;
+}
+
+.card p {
+  color: var(--text-light);
+}
+
+.card:hover {
+  transform: translateY(-12px);
+  border-top: 5px solid var(--primary);
+}
+
+/* =========================
+   FORMS
+========================= */
+.form-container {
+  max-width: 400px;
+  margin: 80px auto;
+  background: white;
+  padding: 40px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.form-container h2 {
+  margin-bottom: 20px;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.input-group input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* =========================
+   FOOTER
+========================= */
+footer {
+  background: linear-gradient(135deg, #1f1f1f, #2b2b2b);
+  color: #ccc;
+  text-align: center;
+  padding: 40px;
+  margin-top: 80px;
+}
