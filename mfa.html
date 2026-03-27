@@ -5,64 +5,54 @@
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Autenticação em Duas Etapas</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='style.css'>
     <script src='main.js'></script>
 </head>
 <body>
-    <h1 class="header" id="header">Verificação de Segurança</h1>
 
-    <form class="login100-form" id="formMFA">
-        <span class="login100-form-title bookshell-fonte3 py-3">
-            Autenticação em 2 Fatores
-        </span>
+    <header class="header">
+        <!-- logo ou nav podem entrar aqui futuramente -->
+    </header>
 
-        <!-- INSTRUÇÃO -->
-        <div class="text-center p-b-20">
-            <span class="fonte-1">
-                Insira o código gerado pelo seu Authenticator
-            </span>
+    <div class="form-container">
+        <h2>Autenticação em 2 Fatores</h2>
+
+        <p style="text-align: center; color: var(--text-light); margin-bottom: 20px;">
+            Insira o código gerado pelo seu Authenticator
+        </p>
+
+        <form id="formMFA" action="verificarMFA.php" method="POST">
+
+            <!-- CÓDIGO MFA -->
+            <div class="input-group">
+                <input
+                    type="text"
+                    id="codigo"
+                    name="codigo"
+                    placeholder="000000"
+                    maxlength="6"
+                    pattern="\d{6}"
+                    required>
+                <p id="codigo-mensagem"></p>
+            </div>
+
+            <button class="btn btn-primary big" type="submit" id="btnVerificar">
+                Verificar
+            </button>
+
+        </form>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <span>Não conseguiu acessar?</span>
+            <a href="recuperarMFA.html">Recuperar acesso</a>
         </div>
 
-        <!-- CÓDIGO MFA -->
-        <div class="container2 position-relative">
-            <input class="input100 input-cadastro"
-                   type="text"
-                   id="codigo"
-                   name="codigo"
-                   placeholder="000000"
-                   maxlength="6"
-                   pattern="\d{6}"
-                   required>
-
-            <p id="codigo-mensagem" class="mensagem"></p>
-
-            <span class="focus-input100"></span>
-
-            <span class="symbol-input100">
-                <i class="bi bi-shield-lock-fill icon pb-3"></i>
-            </span>
-        </div>
-
-        <!-- BOTÃO -->
-        <button class="login100-form-btn fonte-2"
-                type="submit"
-                style="color: white;"
-                id="btnVerificar">
-            Verificar
-        </button>
-
-        <!-- OPÇÕES -->
-        <div class="text-center p-t-20">
-            <span class="fonte-1">Não conseguiu acessar?</span>
-            <a class="fonte-2" href="recuperarMFA.html">Recuperar acesso</a>
-        </div>
-
-        <div class="text-center p-t-136">
-            <a class="fonte-3" href="login.html">
-                Voltar para o login
-                <i class="fa fa-long-arrow-right m-l-5" aria-hidden="true"></i>
+        <div style="text-align: center; margin-top: 15px;">
+            <a href="login.html">
+                ← Voltar para o login
             </a>
         </div>
-    </form>
+    </div>
+
 </body>
 </html>
