@@ -70,30 +70,21 @@
             const senha = document.getElementById("senha").value;
             const confirmar = document.getElementById("confirmarSenha").value;
 
+            const regexemail = /^[a-zA-Z0-9\.\_\-]{1,}@pucpr\.edu\.br$/;
+            
+            if (!regexemail.test(email)) {
+                document.getElementById("msgEmail").innerText = "Email inválido!";
+                return;
+            } else {
+                document.getElementById("msgEmail").innerText = "Email válido";
+}
+
             // validação
             if (senha !== confirmar) {
                 document.getElementById("msgConfirmar").innerText = "Senhas não coincidem!";
                 return;
             }
 
-            try {
-                const response = await fetch("http://localhost:3000/register", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ email, senha })
-                });
-
-                const data = await response.json();
-
-                alert(data.message);
-
-                window.location.href = "Confirmação.html";
-
-            } catch (error) {
-                alert("Erro ao cadastrar");
-            }
         });
     </script>
 
