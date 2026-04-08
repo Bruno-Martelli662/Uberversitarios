@@ -1,0 +1,42 @@
+TERMO DE CONSENTIMENTO E POLÍTICA DE TRATAMENTO DE DADOS PESSOAIS
+Este documento estabelece as condições sob as quais a plataforma Uberversitários (doravante denominada "Plataforma") realiza o tratamento de dados pessoais, em estrita observância à Lei Geral de Proteção de Dados Pessoais (LGPD).
+
+CLÁUSULA PRIMEIRA – DO OBJETO E CONSENTIMENTO
+1.1. Ao realizar o cadastro e clicar em "Aceito", o Usuário (Titular dos Dados) manifesta sua vontade livre, informada e inequívoca, consentindo com o tratamento de seus dados pessoais para as finalidades específicas de viabilização de caronas solidárias no ambiente universitário.
+
+CLÁUSULA SEGUNDA – DOS DADOS COLETADOS E FINALIDADES
+2.1. O Uberversitários coletará e processará os seguintes dados, sob as respectivas justificativas legais:
+
+Dados de Identificação (Nome e CPF): Destinados à identificação inequívoca do Titular, visando a segurança da comunidade e prevenção a fraudes.
+
+Dados de Contato (E-mail e Telefone): Necessários para a comunicação entre as partes (motorista e passageiro) e para o envio de notificações operacionais do serviço.
+
+Credenciais (Senha): Utilizadas para autenticação e controle de acesso, armazenadas de forma criptografada (hash).
+
+Dados Logísticos e de Veículo (Placa, Modelo, Origem e Destino): Essenciais para a execução do serviço de carona e monitoramento da segurança do trajeto.
+
+CLÁUSULA TERCEIRA – DO COMPARTILHAMENTO DE DADOS
+3.1. Para a estrita execução do serviço de intermediação, os dados de contato e do veículo serão compartilhados entre os Usuários vinculados à mesma viagem.
+3.2. A Plataforma não comercializará dados pessoais com terceiros. O compartilhamento com autoridades judiciais ou administrativas ocorrerá exclusivamente mediante ordem judicial ou estrito cumprimento de dever legal.
+
+CLÁUSULA QUARTA – DA SEGURANÇA E ARMAZENAMENTO
+4.1. O Controlador de dados compromete-se a adotar medidas técnicas e administrativas aptas a proteger os dados pessoais de acessos não autorizados e de situações acidentais ou ilícitas de destruição, perda, alteração ou difusão.
+4.2. Os dados de localização serão retidos apenas pelo tempo necessário para a consecução da finalidade do serviço ou para cumprimento de prazos prescricionais previstos no Marco Civil da Internet (Lei nº 12.965/14).
+
+CLÁUSULA QUINTA – DOS DIREITOS DO TITULAR
+5.1. Conforme o Artigo 18 da LGPD, o Usuário poderá, a qualquer tempo e mediante requisição à Plataforma:
+
+Confirmar a existência de tratamento e acessar seus dados;
+
+Solicitar a correção de dados incompletos ou inexatos;
+
+Requerer a anonimização, bloqueio ou eliminação de dados desnecessários;
+
+Revogar o consentimento, estando ciente de que tal ato poderá inviabilizar a utilização da Plataforma.
+
+CLÁUSULA SEXTA – DA RESPONSABILIDADE DO USUÁRIO
+6.1. O Usuário é o único responsável pela veracidade dos dados inseridos. O compartilhamento de credenciais de acesso (login e senha) com terceiros é estritamente proibido, sendo de responsabilidade do Usuário qualquer incidente decorrente de sua má gestão de acesso.
+
+CLÁUSULA SÉTIMA – DAS DISPOSIÇÕES GERAIS
+7.1. Este Termo poderá ser atualizado periodicamente para adequação a novas normativas da Autoridade Nacional de Proteção de Dados (ANPD), sendo o Usuário notificado sobre alterações substanciais.
+7.2. Fica eleito o foro da comarca de [Inserir sua Cidade] para dirimir quaisquer controvérsias oriundas deste instrumento.
