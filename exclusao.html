@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Privacidade e Dados</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <img src="logo.jpeg" class="logo" alt="Logo">
+    <div>
+      <button class="btn btn-outline" onclick="goHome()">Início</button>
+    </div>
+  </header>
+
+  <!-- INTRO -->
+  <section class="section">
+    <h1 class="title">Privacidade e Controle de Dados</h1>
+    <p class="subtitle">
+      De acordo com a LGPD, você pode solicitar a exclusão total ou parcial dos seus dados a qualquer momento.
+    </p>
+  </section>
+
+  <!-- OPÇÕES -->
+  <section class="container">
+
+    <!-- EXCLUSÃO PARCIAL -->
+    <div class="form-container">
+      <h2>Excluir dados específicos</h2>
+
+      <p style="margin-bottom:15px; color:#777;">
+        Selecione quais informações deseja remover do sistema:
+      </p>
+
+      <div class="input-group">
+        <label><input type="checkbox" value="telefone"> Telefone</label><br>
+        <label><input type="checkbox" value="endereco"> Endereço</label><br>
+        <label><input type="checkbox" value="historico"> Histórico de viagens</label><br>
+        <label><input type="checkbox" value="pagamentos"> Dados de pagamento</label>
+      </div>
+
+      <button class="btn btn-primary" onclick="deletePartial()">
+        Excluir selecionados
+      </button>
+    </div>
+
+    <!-- EXCLUSÃO TOTAL -->
+    <div class="form-container" style="margin-top:40px;">
+      <h2 style="color:#ff5a5f;">Excluir conta completamente</h2>
+
+      <p style="margin-bottom:15px; color:#777;">
+        Esta ação removerá permanentemente sua conta e todos os dados associados.
+        Esta operação não pode ser desfeita.
+      </p>
+
+      <div class="input-group">
+        <input type="checkbox" id="confirmDelete">
+        <label for="confirmDelete">
+          Confirmo que desejo excluir minha conta permanentemente
+        </label>
+      </div>
+
+      <button class="btn btn-primary" onclick="deleteAccount()">
+        Excluir conta
+      </button>
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>Contato: contato@site.com</p>
+    <p>Direitos garantidos pela LGPD</p>
+  </footer>
+
+  <script>
+    function goHome() {
+      window.location.href = "/";
+    }
+
+    function deletePartial() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+      let selected = [];
+
+      checkboxes.forEach(cb => {
+        if (cb.value) selected.push(cb.value);
+      });
+
+      if (selected.length === 0) {
+        alert("Selecione ao menos um dado para excluir.");
+        return;
+      }
+
+      // Aqui você enviaria para o backend
+      console.log("Excluir parcialmente:", selected);
+
+      alert("Solicitação de exclusão parcial enviada!");
+    }
+
+    function deleteAccount() {
+      const confirm = document.getElementById("confirmDelete").checked;
+
+      if (!confirm) {
+        alert("Você precisa confirmar a exclusão total.");
+        return;
+      }
+
+      // Aqui você enviaria para o backend
+      console.log("Excluir conta completamente");
+
+      alert("Conta excluída com sucesso!");
+    }
+  </script>
+
+</body>
+</html>
