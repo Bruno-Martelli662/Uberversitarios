@@ -40,3 +40,20 @@ CLÁUSULA SEXTA – DA RESPONSABILIDADE DO USUÁRIO
 CLÁUSULA SÉTIMA – DAS DISPOSIÇÕES GERAIS
 7.1. Este Termo poderá ser atualizado periodicamente para adequação a novas normativas da Autoridade Nacional de Proteção de Dados (ANPD), sendo o Usuário notificado sobre alterações substanciais.
 7.2. Fica eleito o foro da comarca de [Inserir sua Cidade] para dirimir quaisquer controvérsias oriundas deste instrumento.
+
+CLÁUSULA OITAVA – DA NATUREZA SOLIDÁRIA E ISENÇÃO DE RESPONSABILIDADE
+8.1. Natureza Não Comercial: O Usuário declara estar ciente de que o Uberversitários é uma plataforma destinada exclusivamente à facilitação de caronas solidárias entre membros da comunidade acadêmica. O serviço não possui fins lucrativos e não se confunde com serviços de transporte público ou privado de passageiros (como táxis ou aplicativos de transporte individual).
+
+8.2. Rateio de Custos: É permitido o rateio de custos operacionais da viagem (combustível e pedágio) entre os Usuários, desde que o valor não exceda os custos reais do trajeto. A percepção de lucro por parte do Usuário Motorista desnatura a finalidade da Plataforma e constitui violação grave a estes Termos, sujeitando o infrator à exclusão imediata.
+
+8.3. Ausência de Vínculo: O Uberversitários atua estritamente como provedor de aplicação de internet, não mantendo qualquer vínculo empregatício, societário ou de subordinação com os Usuários. A Plataforma não garante a segurança, idoneidade ou as condições mecânicas dos veículos, sendo a adesão à carona um ato de livre escolha e responsabilidade de cada indivíduo.
+
+8.4. Limitação de Responsabilidade Civil: Na máxima extensão permitida pela legislação brasileira, a Plataforma não se responsabiliza por:
+
+Danos materiais, morais ou físicos decorrentes de acidentes de trânsito;
+
+Condutas ilícitas ou inadequadas praticadas por Usuários durante o trajeto;
+
+Eventuais perdas de compromissos acadêmicos ou profissionais por atrasos ou cancelamentos de viagens.
+
+8.5. Seguro: Recomenda-se que o Usuário Motorista possua seguro com cobertura para terceiros (Danos Corporais e Materiais), estando ciente de que o seguro obrigatório (DPVAT) cobre apenas danos pessoais básicos em casos de acidente.
