@@ -20,7 +20,6 @@
     <div>
       <button class="btn btn-outline" onclick="goLogin()">Login</button>
       <button class="btn btn-primary" onclick="goCadastro()">Cadastro</button>
-      <button class="btn btn-primary big" onclick="goViagems()">Ver/criar viagens</button>
     </div>
   </header>
 
@@ -57,15 +56,6 @@
     </div>
   </section>
 
-  <!-- VIAGENS -->
-  <section class="container">
-    <h2 class="title">Viagens disponíveis</h2>
-
-    <div class="cards" id="cardsContainer">
-      <!-- preenchido via JS -->
-    </div>
-  </section>
-
   <footer>
     <p>Contato: uberversitarios@gmail.com</p>
     <p>Privacidade e dados: (41) 98765-4321</p>
@@ -82,10 +72,6 @@
 
     function goCadastro() {
       window.location.href = "cadastro.html";
-    }
-
-    function goViagems() {
-      window.location.href = "viagems.html";
     }
 
     // Dados simulados (mais realistas agora)
