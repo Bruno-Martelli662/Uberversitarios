@@ -112,72 +112,39 @@ button:hover {
 
 <div class="main">
 
-    <!-- LADO ESQUERDO (CADASTRO) -->
     <div class="lado esquerda">
 
-        <h1>Cadastro</h1>
+        <h1>Cadastro de Viagem</h1>
 
         <form id="formCadastro">
 
-            <input type="email" id="email" placeholder="Email" required>
-            <p id="msgEmail"></p>
+            <input type="Nome" style="width: 600px; height: 40px;" id="Nome" placeholder="Nome" required>
+            <p id="msgNome"></p>
 
-            <input type="password" id="senha" placeholder="Senha" required>
+            <input type="Veiculo" style="width: 600px; height: 40px;" id="Veiculo" placeholder="Veículo" required>
             <p id="msgSenha"></p>
 
-            <input type="password" id="confirmarSenha" placeholder="Confirmar senha" required>
-            <p id="msgConfirmar"></p>
+            <input type="Placa" style="width: 600px; height: 40px;" id="Placa" placeholder="Placa" required>
+            <p id="msgPlaca"></p>
 
-            <button type="submit">Cadastrar</button>
+            <input type="Contato" style="width: 600px; height: 40px;" id="Contato" placeholder="Contato" required>
+            <p id="msgContato"></p>
+
+            <input type="Inicial" style="width: 600px; height: 40px;" id="Inicial" placeholder="Destino inicial" required>
+            <p id="msgInicial"></p>
+
+            <input type="Final" style="width: 600px; height: 40px;" id="Final" placeholder="Destino final" required>
+            <p id="msgInicial"></p>
+            
+
+            <button type="submit" style="width: 600px; height: 40px;">Cadastrar Viagem</button>
 
         </form>
 
     </div>
 
-    <!-- LADO DIREITO (MOTORISTA) -->
-    <div class="lado direita">
-
-        <h1>Motorista</h1>
-
-        <p><strong>Nome do Motorista:</strong></p>
-        <p><strong>Veículo:</strong></p>
-        <p><strong>Contato:</strong></p>
-
-        <h2>Rota</h2>
-
-        <h3>Integrantes:</h3>
-
-    </div>
-
 </div>
 
-<script>
-    const form = document.getElementById("formCadastro");
-
-    form.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        const email = document.getElementById("email").value;
-        const senha = document.getElementById("senha").value;
-        const confirmar = document.getElementById("confirmarSenha").value;
-
-        const regexemail = /^[a-zA-Z0-9._-]+@pucpr\.edu\.br$/;
-
-        if (!regexemail.test(email)) {
-            document.getElementById("msgEmail").innerText = "Email inválido!";
-            return;
-        } else {
-            document.getElementById("msgEmail").innerText = "Email válido";
-        }
-
-        if (senha !== confirmar) {
-            document.getElementById("msgConfirmar").innerText = "Senhas não coincidem!";
-            return;
-        }
-
-        alert("Cadastro realizado (simulação)");
-    });
-</script>
 
 </body>
 </html>
