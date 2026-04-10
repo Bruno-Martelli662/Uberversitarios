@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirme seu e-mail</title>
+
+  <!-- CSS correto do seu projeto -->
+
+  <link rel="stylesheet" href="styles.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .status-icon {
+      font-size: 50px;
+      margin-bottom: 10px;
+      display: block;
+    }
+  </style>
+
+</head>
+<body>
+
+  <div class="form-container" style="text-align: center;">
+    <span class="status-icon">📧</span>
+
+```
+<h2 class="title" style="font-size: 24px;">Verifique seu e-mail</h2>
+
+<p>Enviamos um link de confirmação para você.</p>
+<p class="subtitle" style="font-size: 14px; margin-top: 10px;">
+  Após confirmar, você poderá acessar todas as funcionalidades.
+</p>
+
+<!-- Botão funcional -->
+<button class="btn btn-primary big" style="width: 100%; margin-top: 30px;" onclick="window.location.href='login.html'">
+  Já confirmei
+</button>
+
+<p class="small" style="margin-top: 20px;">
+  Não recebeu? 
+  <a href="#" id="resend-link" class="link-alt" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+    Reenviar e-mail
+  </a>
+</p>
+```
+
+  </div>
+
+  <!-- Script original do projeto (IMPORTANTE) -->
+
+  <script src="script.js"></script>
+
+</body>
+</html>

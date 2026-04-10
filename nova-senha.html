@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Senha - Nosso Serviço</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div id="successMessage" class="message success"></div>
+            <div id="errorMessage" class="message error"></div>
+            
+            <form id="newPasswordForm">
+                <h2 class="title">Criar Nova Senha</h2>
+                
+                <div class="input-group">
+                    <label for="new-password">Nova Senha</label>
+                    <input type="password" id="new-password" name="new-password" required>
+                    <small style="color: var(--text-light); display: block; margin-top: 5px;">A senha deve conter pelo menos 8 caracteres, incluindo números e caracteres especiais</small>
+                </div>
+                
+                <div class="input-group">
+                    <label for="confirm-new-password">Confirmar Nova Senha</label>
+                    <input type="password" id="confirm-new-password" name="confirm-new-password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary big" style="width: 100%;">Salvar Nova Senha</button>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <p>Lembrou da senha? <a href="login.html" style="color: var(--primary);">Faça login</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</body>
+</html>

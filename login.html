@@ -1,52 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Pagina de login</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='style.css'>
-    <script src='main.js'></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Nosso Serviço</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
+    <div class="container">
+        <div class="form-container">
+            <form id="loginForm">
+                <h2 class="title">Entrar na sua conta</h2>
+                
+                <div class="input-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
 
-    <header class="header">
-        <!-- logo ou nav podem entrar aqui futuramente -->
-    </header>
+                <div class="input-group" id="2fa-field" style="display: none;">
+                    <label for="2fa-code">Código do Autenticador</label>
+                    <input type="text" id="2fa-code" name="2fa-code" maxlength="6" placeholder="123456">
+                    <small style="color: var(--text-light); display: block; margin-top: 5px;">Abra seu Google Authenticator e insira o código de 6 dígitos</small>
+                </div>
 
-    <div class="form-container">
-        <h2>Login</h2>
-        <form id="formLogin">
-
-            <!-- EMAIL -->
-            <div class="input-group">
-                <input type="email" id="email" name="email" placeholder="Email" required>
-                <p id="email-mensagem"></p>
-            </div>
-
-            <!-- SENHA -->
-            <div class="input-group">
-                <input type="password" id="password" name="senha" placeholder="Senha" required>
-                <p id="password-mensagem"></p>
-            </div>
-
-            <button class="btn btn-primary big" type="submit" id="btnLogin">
-                Login
-            </button>
-
-        </form>
-
-        <div style="text-align: center; margin-top: 20px;">
-            <span>Recuperar</span>
-            <a href="novasenha.html">Senha</a>
-        </div>
-
-        <div style="text-align: center; margin-top: 15px;">
-            <a href="cadastro.html">
-                Criar uma conta →
-            </a>
+                <button type="submit" class="btn btn-primary big" style="width: 100%;">Entrar</button>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <p>Não tem uma conta? <a href="cadastro.html" style="color: var(--primary);">Crie uma conta</a></p>
+                    <p><a href="recuperar-senha.html" style="color: var(--primary);">Esqueceu a senha?</a></p>
+                </div>
+            </form>
         </div>
     </div>
 
+    <script src="script.js"></script>
 </body>
 </html>

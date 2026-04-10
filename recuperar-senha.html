@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Senha - Nosso Serviço</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <form id="recoverForm">
+                <h2 class="title">Alterar sua senha</h2>
+                
+                <div class="input-group">
+                    <label for="email">Digite o e-mail cadastrado na sua conta</label>
+                    <input type="email" id="email" name="email" required>
+                    <small style="color: var(--text-light); display: block; margin-top: 5px;">Enviaremos um link para redefinir sua senha</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary big" style="width: 100%;">Enviar link de recuperação</button>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <p>Não tem uma conta? <a href="cadastro.html" style="color: var(--primary);">Crie uma conta</a></p>
+                    <p>Lembrou da senha? <a href="login.html" style="color: var(--primary);">Faça login</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
