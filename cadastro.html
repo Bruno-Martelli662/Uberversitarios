@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -51,4 +52,97 @@
 
     <script src="script.js"></script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1 class="header">Crie sua conta</h1>
+
+    <form class="login100-form" id="formCadastro">
+
+        <span class="login100-form-title">
+            Cadastro
+        </span>
+
+        <!-- EMAIL -->
+        <div class="container2 position-relative">
+            <input class="input100 input-cadastro"
+                type="email"
+                id="email"
+                placeholder="Email"
+                required>
+            <p id="msgEmail" class="mensagem"></p>
+        </div>
+
+        <!-- SENHA -->
+        <div class="container2 position-relative">
+            <input class="input100 input-cadastro"
+                type="password"
+                id="senha"
+                placeholder="Senha"
+                required>
+            <p id="msgSenha" class="mensagem"></p>
+        </div>
+
+        <!-- CONFIRMAR SENHA -->
+        <div class="container2 position-relative">
+            <input class="input100 input-cadastro"
+                type="password"
+                id="confirmarSenha"
+                placeholder="Confirmar senha"
+                required>
+            <p id="msgConfirmar" class="mensagem"></p>
+        </div>
+
+        <!-- BOTÃO -->
+        <button class="login100-form-btn" type="submit">
+            Cadastrar
+        </button>
+
+        <!-- VOLTAR LOGIN -->
+        <div class="text-center p-t-20">
+            <span>Já tem conta?</span>
+            <a href="login.html">Fazer login</a>
+        </div>
+
+    </form>
+
+    <script>
+        const form = document.getElementById("formCadastro");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById("email").value;
+            const senha = document.getElementById("senha").value;
+            const confirmar = document.getElementById("confirmarSenha").value;
+
+            const regexemail = /^[a-zA-Z0-9\.\_\-]{1,}@pucpr\.edu\.br$/;
+            
+            if (!regexemail.test(email)) {
+                document.getElementById("msgEmail").innerText = "Email inválido!";
+                return;
+            } else {
+                document.getElementById("msgEmail").innerText = "Email válido";
+}
+
+            // validação
+            if (senha !== confirmar) {
+                document.getElementById("msgConfirmar").innerText = "Senhas não coincidem!";
+                return;
+            }
+
+        });
+    </script>
+
+</body>
+>>>>>>> 1836d00816dd6272bd1ab4fea9db0bcf220a2140
 </html>
