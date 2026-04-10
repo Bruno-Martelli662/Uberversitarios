@@ -26,6 +26,7 @@ $stmt->execute();
 $stmt->close();
 
 echo "E-mail confirmado com sucesso! Você já pode fazer login.";
-
+header("Location: email-confirmado.html");
+exit();
 $conn->close();
 ?>
