@@ -292,6 +292,14 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
     
     console.log(' Iniciando processo de cadastro...');
     
+    // Verificar se a checkbox de termos foi marcada
+    const termsCheckbox = document.getElementById('termsCheckbox');
+    if (!termsCheckbox || !termsCheckbox.checked) {
+        alert("Você precisa aceitar os Termos e Serviços para continuar com o cadastro!");
+        termsCheckbox?.focus();
+        return;
+    }
+    
     const formData = {
         nome: document.getElementById('name').value.trim(),
         email: document.getElementById('email').value.trim(),
@@ -303,7 +311,8 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
     console.log(' Dados do formulário (sem senhas):', {
         nome: formData.nome,
         email: formData.email,
-        telefone: formData.telefone
+        telefone: formData.telefone,
+        termosAceitos: true
     });
     
     if (!formData.nome || formData.nome.length < 2) {
@@ -342,6 +351,10 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
         formData.senha = hashSenha(formData.senha);
         delete formData.confirmarSenha;
         
+        // Adicionar informação de aceite dos termos aos dados
+        formData.termosAceitos = true;
+        formData.dataAceiteTermos = new Date().toISOString();
+        
         console.log(' Enviando dados criptografados para o servidor...');
         
         const submitButton = e.target.querySelector('button[type="submit"]');
@@ -359,6 +372,8 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
                 alert('Cadastro realizado com sucesso! Verifique seu e-mail para confirmar.');
                 
                 localStorage.setItem('emailParaConfirmacao', formData.email);
+                localStorage.setItem('termosAceitos', 'true');
+                localStorage.setItem('dataAceiteTermos', formData.dataAceiteTermos);
                 
                 setTimeout(() => {
                     window.location.href = 'confirmacao-email.html';
@@ -376,7 +391,6 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
         alert("Erro ao conectar com o servidor: " + error.message);
     }
 });
-
 document.getElementById('loginForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
