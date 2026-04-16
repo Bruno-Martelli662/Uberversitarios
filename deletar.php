@@ -15,10 +15,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
     $senha = trim($_POST['password']);
 
-    echo "Email digitado: [$email] <br>";
-
     $sql = "SELECT id, nome_usuario, senha_hash FROM usuarios WHERE LOWER(email) = LOWER(?)";
     $stmt = $conn->prepare($sql);
+
+    if (!$stmt) {
+        die("Erro na query: " . $conn->error);
+    }
+
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -27,27 +30,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $user = $result->fetch_assoc();
 
-        echo "Usuário encontrado: " . $user['nome_usuario'] . "<br>";
-
-        echo "Senha digitada: [$senha]<br>";
-        echo "Senha no banco: [" . $user['senha_hash'] . "]<br>";
-
         if (hash('sha256', $senha) === $user['senha_hash']) {
 
-            // Deletar usuário
             $delete = $conn->prepare("DELETE FROM usuarios WHERE id = ?");
             $delete->bind_param("i", $user['id']);
 
             if ($delete->execute()) {
-                echo "Usuário deletado com sucesso!";
+
+                // Mensagem + redirecionamento
+                echo "<h2>Conta deletada com sucesso!</h2>";
+                echo "<p>Redirecionando para a página inicial...</p>";
+
+                header("refresh:2;url=index.html");
+                exit();
+
             } else {
-                echo "Erro ao deletar: " . $delete->error;
+                echo "Erro ao deletar.";
             }
 
             $delete->close();
 
         } else {
-            echo " Senha incorreta.";
+            echo "Senha incorreta.";
         }
 
     } else {
