@@ -11,15 +11,12 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
 --
 -- Banco de dados: `sistema_autenticacao`
 --
+
+CREATE DATABASE IF NOT EXISTS sistema_autenticacao;
+USE sistema_autenticacao;
 
 -- --------------------------------------------------------
 
@@ -49,7 +46,11 @@ CREATE TABLE `usuarios` (
   `confirmado` tinyint(1) DEFAULT 0,
   `token_confirmacao` varchar(255) DEFAULT NULL,
   `google_2fa_secret` varchar(32) DEFAULT NULL,
-  `google_2fa_ativado` tinyint(1) DEFAULT 0
+  `google_2fa_ativado` tinyint(1) DEFAULT 0,
+
+  -- 🔴 NOVO CAMPO (ADMIN PANEL)
+  `banido` tinyint(1) DEFAULT 0
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -69,7 +70,8 @@ CREATE TABLE `viagens` (
   `criada_em` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
+-- --------------------------------------------------------
+
 -- Índices para tabelas despejadas
 --
 
@@ -97,47 +99,47 @@ ALTER TABLE `viagens`
   ADD KEY `passageiro_id` (`passageiro_id`),
   ADD KEY `contato` (`contato`);
 
---
+-- --------------------------------------------------------
+
 -- AUTO_INCREMENT para tabelas despejadas
 --
 
---
--- AUTO_INCREMENT de tabela `sessoes`
---
 ALTER TABLE `sessoes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `usuarios`
---
 ALTER TABLE `usuarios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `viagens`
---
 ALTER TABLE `viagens`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- Restrições para tabelas despejadas
+-- --------------------------------------------------------
+
+-- Restrições para tabelas
 --
 
---
--- Restrições para tabelas `sessoes`
---
 ALTER TABLE `sessoes`
-  ADD CONSTRAINT `sessoes_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `sessoes_ibfk_1`
+  FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`)
+  ON DELETE CASCADE;
 
---
--- Restrições para tabelas `viagens`
---
 ALTER TABLE `viagens`
-  ADD CONSTRAINT `viagens_ibfk_1` FOREIGN KEY (`motorista_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `viagens_ibfk_2` FOREIGN KEY (`passageiro_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `viagens_ibfk_3` FOREIGN KEY (`contato`) REFERENCES `usuarios` (`telefone`) ON DELETE SET NULL;
+  ADD CONSTRAINT `viagens_ibfk_1`
+  FOREIGN KEY (`motorista_id`) REFERENCES `usuarios` (`id`)
+  ON DELETE CASCADE,
+
+  ADD CONSTRAINT `viagens_ibfk_2`
+  FOREIGN KEY (`passageiro_id`) REFERENCES `usuarios` (`id`)
+  ON DELETE SET NULL,
+
+  ADD CONSTRAINT `viagens_ibfk_3`
+  FOREIGN KEY (`contato`) REFERENCES `usuarios` (`telefone`)
+  ON DELETE SET NULL;
+
 COMMIT;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+-- =========================
+-- IMPORTANTE
+-- =========================
+-- NOVO CAMPO ADICIONADO:
+-- usuarios.banido -> permite bloquear usuários no painel admin
