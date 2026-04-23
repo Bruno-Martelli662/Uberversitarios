@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 10/04/2026 às 02:18
+-- Tempo de geração: 24/04/2026 às 00:53
 -- Versão do servidor: 10.4.32-MariaDB
--- Versão do PHP: 8.2.12
+-- Versão do PHP: 8.1.25
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -32,6 +32,20 @@ CREATE TABLE `sessoes` (
   `usuario_id` int(11) NOT NULL,
   `token_sessao` varchar(255) NOT NULL,
   `data_expiracao` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `user_adm`
+--
+
+CREATE TABLE `user_adm` (
+  `id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `telegram_id` bigint(20) DEFAULT NULL,
+  `telegram_username` varchar(100) DEFAULT NULL,
+  `telegram_auth_token` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -81,6 +95,14 @@ ALTER TABLE `sessoes`
   ADD KEY `usuario_id` (`usuario_id`);
 
 --
+-- Índices de tabela `user_adm`
+--
+ALTER TABLE `user_adm`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `telegram_id` (`telegram_id`);
+
+--
 -- Índices de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
@@ -105,6 +127,12 @@ ALTER TABLE `viagens`
 -- AUTO_INCREMENT de tabela `sessoes`
 --
 ALTER TABLE `sessoes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `user_adm`
+--
+ALTER TABLE `user_adm`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
