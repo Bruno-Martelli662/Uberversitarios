@@ -85,7 +85,7 @@ try {
     $userId = $conn->insert_id;
     error_log("Usuário cadastrado com sucesso. ID: $userId");
 
-    $linkConfirmacao = SITE_URL . "/confirmar-email.php?token=" . urlencode($tokenConfirmacao);
+    $linkConfirmacao = SITE_URL . "/api/confirmar-email.php?token=" . urlencode($tokenConfirmacao);
     $assunto = "Confirme seu e-mail";
     $mensagem = "
     <h1>Olá {$nome},</h1>

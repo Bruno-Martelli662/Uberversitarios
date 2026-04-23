@@ -69,7 +69,7 @@ try {
     }
     $stmt->close();
 
-    $linkRecuperacao = SITE_URL . "/nova-senha.html?token=" . urlencode($tokenRecuperacao);
+    $linkRecuperacao = SITE_URL . "/html/nova-senha.html?token=" . urlencode($tokenRecuperacao);
     $assunto = "Recuperação de Senha - " . SITE_NAME;
     $mensagem = "
     <h1>Olá {$usuario['nome_usuario']},</h1>
