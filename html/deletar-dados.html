@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deletar dados do usuário</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
     <div class="container">
         <div class="form-container">
-            
-            <form action="deletar.php" method="POST"
+            <form action="../api/deletar.php" method="POST"
                   onsubmit="return confirm('⚠️ ATENÇÃO!\n\nTem certeza que deseja deletar sua conta?\nEssa ação é permanente e não pode ser desfeita!');">
                 
                 <h2 class="title">Deletar conta</h2>
@@ -28,9 +27,7 @@
                 <button type="submit" class="btn btn-primary big" style="width: 100%;">
                     Deletar conta
                 </button>
-
             </form>
-
         </div>
     </div>
 </body>

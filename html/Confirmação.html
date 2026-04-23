@@ -4,13 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Confirme seu e-mail</title>
-  
-  <link rel="stylesheet" href="style.css">
-  
+  <link rel="stylesheet" href="../css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
   <style>
-    /* Estilos específicos apenas para centralizar o box na tela */
     body {
       display: flex;
       align-items: center;
@@ -26,30 +22,24 @@
   </style>
 </head>
 <body>
-
   <div class="form-container" style="text-align: center;">
     <span class="status-icon">📧</span>
-    
     <h2 class="title" style="font-size: 24px;">Verifique seu e-mail</h2>
-    
     <p>Enviamos um link de confirmação para você.</p>
     <p class="subtitle" style="font-size: 14px; margin-top: 10px;">
       Após confirmar, você poderá acessar todas as funcionalidades.
     </p>
-
     <button class="btn btn-primary big" style="width: 100%; margin-top: 30px;" onclick="window.location.reload()">
       Já confirmei
     </button>
-
     <p class="small" style="margin-top: 20px;">
       Não recebeu? 
       <a href="#" class="link-alt" style="color: var(--primary); font-weight: 600; text-decoration: none;" onclick="reenviarEmail()">Reenviar e-mail</a>
     </p>
   </div>
-
   <script>
     function reenviarEmail() {
-      fetch('/api/resend-email', { method: 'POST' })
+      fetch('../api/resend-email', { method: 'POST' })
         .then(() => alert('E-mail reenviado com sucesso!'))
         .catch(() => alert('Erro ao tentar reenviar.'));
     }

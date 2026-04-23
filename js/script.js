@@ -30,7 +30,7 @@ async function loadPublicKey() {
     
     try {
         console.log(' Carregando chave pública...');
-        const response = await fetch('public.key');
+        const response = await fetch('../public.key');
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
@@ -292,7 +292,6 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
     
     console.log(' Iniciando processo de cadastro...');
     
-    // Verificar se a checkbox de termos foi marcada
     const termsCheckbox = document.getElementById('termsCheckbox');
     if (!termsCheckbox || !termsCheckbox.checked) {
         alert("Você precisa aceitar os Termos e Serviços para continuar com o cadastro!");
@@ -351,7 +350,6 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
         formData.senha = hashSenha(formData.senha);
         delete formData.confirmarSenha;
         
-        // Adicionar informação de aceite dos termos aos dados
         formData.termosAceitos = true;
         formData.dataAceiteTermos = new Date().toISOString();
         
@@ -363,7 +361,7 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
         submitButton.textContent = 'Processando...';
         
         try {
-            const response = await sendSecureRequest('cadastrar.php', formData);
+            const response = await sendSecureRequest('../api/cadastrar.php', formData);
         
             console.log(' Resposta do servidor:', response);
             
@@ -391,6 +389,7 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
         alert("Erro ao conectar com o servidor: " + error.message);
     }
 });
+
 document.getElementById('loginForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -429,7 +428,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async function(
         submitButton.textContent = 'Entrando...';
         
         try {
-            const response = await sendSecureRequest('login.php', formData);
+            const response = await sendSecureRequest('../api/login.php', formData);
             
             console.log(' Resposta do login:', response);
             
@@ -517,7 +516,7 @@ document.getElementById('newPasswordForm')?.addEventListener('submit', async fun
         submitButton.textContent = 'Salvando...';
         
         try {
-            const response = await sendSecureRequest('nova-senha.php', formData);
+            const response = await sendSecureRequest('../api/nova-senha.php', formData);
             
             console.log(' Resposta do servidor:', response);
             
@@ -558,7 +557,7 @@ document.getElementById('recoverForm')?.addEventListener('submit', async functio
     }
     
     try {
-        const response = await sendSecureRequest('recuperar-senha.php', formData);
+        const response = await sendSecureRequest('../api/recuperar-senha.php', formData);
         
         if (response.success) {
             alert(response.message || "E-mail de recuperação enviado com sucesso!");
@@ -583,7 +582,7 @@ document.getElementById('resend-link')?.addEventListener('click', async function
     }
     
     try {
-        const response = await sendSecureRequest('api/reenviar-confirmacao.php', { email });
+        const response = await sendSecureRequest('../api/reenviar-confirmacao.php', { email });
         
         if (response.success) {
             alert("E-mail de confirmação reenviado com sucesso!");
@@ -605,7 +604,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (qrCodeImg && ativarBtn) {
         console.log('📱 Carregando configuração do 2FA...');
         
-        sendSecureRequest("gerar-secret.php", {}, true)
+        sendSecureRequest("../api/gerar-secret.php", {}, true)
             .then(data => {
                 console.log('📱 Dados do 2FA recebidos:', data);
                 
@@ -661,7 +660,7 @@ document.getElementById('ativar-btn')?.addEventListener('click', async function(
         this.textContent = 'Ativando...';
         
         try {
-            const response = await sendSecureRequest('ativar-2fa.php', formData, true);
+            const response = await sendSecureRequest('../api/ativar-2fa.php', formData, true);
             
             console.log(' Resposta da ativação 2FA:', response);
             
@@ -690,4 +689,4 @@ document.getElementById('ativar-btn')?.addEventListener('click', async function(
     }
 });
 
-console.log('🚀 Script.js carregado com criptografia híbrida completa!');
+console.log('Script.js carregado com criptografia híbrida completa!');

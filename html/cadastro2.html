@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uberversitários - Cadastro de Viagem</title>
+<style>
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* VARIÁVEIS */
+:root {
+  --primary: #ff5a5f;
+  --secondary: #ff7a18;
+  --gradient: linear-gradient(135deg, #ff5a5f, #ff7a18);
+  --bg: #ffffff;
+  --text: #333;
+  --text-light: #777;
+  --radius: 20px;
+}
+
+/* BODY */
+body {
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* BOLA GRADIENTE */
+body::after {
+  content: "";
+  position: fixed;
+  right: -200px;
+  top: -200px;
+  width: 600px;
+  height: 600px;
+  background: var(--gradient);
+  border-radius: 50%;
+  opacity: 0.9;
+  z-index: -1;
+}
+
+/* LAYOUT PRINCIPAL */
+.main {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* LADOS */
+.lado {
+  flex: 1;
+  padding: 60px;
+}
+
+/* TEXTOS */
+h1 {
+  margin-bottom: 20px;
+  color: var(--primary);
+}
+
+/* FORM */
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+input {
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* BOTÃO */
+button {
+  padding: 12px;
+  border: none;
+  border-radius: 15px;
+  background: var(--secondary);
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+button:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+/* Mensagens */
+.message {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  display: none;
+  text-align: center;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  display: block;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  display: block;
+}
+
+/* Loading */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Voltar */
+.back-btn {
+  margin-top: 20px;
+  background: #6c757d;
+  width: 600px;
+}
+
+.back-btn:hover {
+  background: #5a6268;
+}
+</style>
+</head>
+
+<body>
+<div class="main">
+    <div class="lado esquerda">
+        <h1>Cadastro de Viagem</h1>
+        <p>Preencha os dados abaixo para oferecer uma carona</p>
+
+        <form id="formCadastro">
+            <input type="text" id="Nome" placeholder="Seu nome completo" required>
+            <input type="text" id="Veiculo" placeholder="Veículo (ex: Fiat Uno, Honda Civic)" required>
+            <input type="text" id="Placa" placeholder="Placa do veículo (ex: ABC-1234)" required>
+            <input type="tel" id="Contato" placeholder="WhatsApp com DDD (ex: 41999999999)" required>
+            <input type="text" id="Inicial" placeholder=" Destino inicial (origem)" required>
+            <input type="text" id="Final" placeholder=" Destino final" required>
+            
+            <button type="submit">Cadastrar Viagem</button>
+            <button type="button" class="back-btn" onclick="window.location.href='index_cadastrado.html'">← Voltar</button>
+        </form>
+        
+        <div id="message" class="message"></div>
+    </div>
+</div>
+
+<script>
+document.getElementById('formCadastro').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const telefone = document.getElementById('Contato').value.replace(/\D/g, '');
+    if (telefone.length < 10 || telefone.length > 11) {
+        mostrarMensagem('Telefone inválido! Use DDD + número (ex: 41999999999)', 'error');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('Nome', document.getElementById('Nome').value);
+    formData.append('Veiculo', document.getElementById('Veiculo').value);
+    formData.append('Placa', document.getElementById('Placa').value);
+    formData.append('Contato', telefone);
+    formData.append('Inicial', document.getElementById('Inicial').value);
+    formData.append('Final', document.getElementById('Final').value);
+    
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span class="loading"></span> Cadastrando...';
+    submitBtn.disabled = true;
+    
+    try {
+        const response = await fetch('../api/processar_cadastro_viagem.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            mostrarMensagem('✅' + result.message + ' Redirecionando...', 'success');
+            document.getElementById('formCadastro').reset();
+            setTimeout(() => {
+                window.location.href = 'index_cadastrado.html';
+            }, 2000);
+        } else {
+            mostrarMensagem('❌ ' + result.message, 'error');
+        }
+    } catch (error) {
+        mostrarMensagem('❌ Erro ao conectar: ' + error.message, 'error');
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+});
+
+function mostrarMensagem(texto, tipo) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.className = 'message ' + tipo;
+    messageDiv.textContent = texto;
+    
+    setTimeout(() => {
+        if (messageDiv.className.includes(tipo)) {
+            messageDiv.style.display = 'none';
+            setTimeout(() => {
+                messageDiv.style.display = '';
+                messageDiv.className = 'message';
+            }, 300);
+        }
+    }, 5000);
+}
+</script>
+</body>
+</html>

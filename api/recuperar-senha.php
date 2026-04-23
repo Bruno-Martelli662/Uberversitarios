@@ -1,8 +1,8 @@
 <?php
 ob_clean();
 
-require_once 'config.php';
-require_once 'crypto_utils.php';
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../crypto_utils.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -20,38 +20,21 @@ try {
     $data = CryptoUtils::processEncryptedRequest();
     $canEncrypt = CryptoUtils::canSendEncryptedResponse();
     
-    error_log("Dados recebidos: " . json_encode(array_diff_key($data, ['senha' => ''])));
-    
-    $nome = $data['nome'] ?? '';
-    $email = $data['email'] ?? '';
-    $telefone = $data['telefone'] ?? '';
-    $senhaHash = $data['senha'] ?? '';
+    error_log("Dados recebidos para recuperação de senha");
 
-    if (empty($nome)) {
-        throw new Exception('Nome é obrigatório.');
-    }
+    $email = $data['email'] ?? '';
+
     if (empty($email)) {
         throw new Exception('E-mail é obrigatório.');
-    }
-    if (empty($telefone)) {
-        throw new Exception('Telefone é obrigatório.');
-    }
-    if (empty($senhaHash)) {
-        throw new Exception('Senha é obrigatória.');
     }
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         throw new Exception('E-mail inválido.');
     }
 
-    $telefone = preg_replace('/[^0-9]/', '', $telefone);
-    if (strlen($telefone) < 10 || strlen($telefone) > 11) {
-        throw new Exception('Telefone inválido.');
-    }
-
     $conn = getDBConnection();
 
-    $stmt = $conn->prepare("SELECT id FROM usuarios WHERE email = ?");
+    $stmt = $conn->prepare("SELECT id, nome_usuario FROM usuarios WHERE email = ?");
     if (!$stmt) {
         throw new Exception('Erro na preparação da consulta: ' . $conn->error);
     }
@@ -61,49 +44,55 @@ try {
         throw new Exception('Erro na execução da consulta: ' . $stmt->error);
     }
     
-    $stmt->store_result();
+    $result = $stmt->get_result();
 
-    if ($stmt->num_rows > 0) {
-        throw new Exception('Este e-mail já está cadastrado.');
+    if ($result->num_rows === 0) {
+        throw new Exception('Nenhuma conta encontrada com este e-mail.');
+    }
+
+    $usuario = $result->fetch_assoc();
+    $stmt->close();
+
+    $tokenRecuperacao = gerarToken();
+    $expiracao = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+    $stmt = $conn->prepare("UPDATE usuarios SET token_recuperacao = ?, token_recuperacao_expira = ? WHERE id = ?");
+    if (!$stmt) {
+        throw new Exception('Erro na preparação da atualização: ' . $conn->error);
+    }
+    
+    $stmt->bind_param("ssi", $tokenRecuperacao, $expiracao, $usuario['id']);
+
+    if (!$stmt->execute()) {
+        error_log("Erro SQL ao atualizar token: " . $stmt->error);
+        throw new Exception("Erro ao atualizar token de recuperação");
     }
     $stmt->close();
 
-    $tokenConfirmacao = gerarToken();
-
-    $stmt = $conn->prepare("INSERT INTO usuarios (nome_usuario, email, telefone, senha_hash, token_confirmacao) VALUES (?, ?, ?, ?, ?)");
-    if (!$stmt) {
-        throw new Exception('Erro na preparação da inserção: ' . $conn->error);
-    }
-    
-    $stmt->bind_param("sssss", $nome, $email, $telefone, $senhaHash, $tokenConfirmacao);
-
-    if (!$stmt->execute()) {
-        error_log("Erro SQL ao inserir usuário: " . $stmt->error);
-        throw new Exception('Erro ao cadastrar usuário: ' . $stmt->error);
-    }
-
-    $userId = $conn->insert_id;
-    error_log("Usuário cadastrado com sucesso. ID: $userId");
-
-    $linkConfirmacao = SITE_URL . "/confirmar-email.php?token=" . urlencode($tokenConfirmacao);
-    $assunto = "Confirme seu e-mail";
+    $linkRecuperacao = SITE_URL . "/nova-senha.html?token=" . urlencode($tokenRecuperacao);
+    $assunto = "Recuperação de Senha - " . SITE_NAME;
     $mensagem = "
-    <h1>Olá {$nome},</h1>
-    <p>Obrigado por se cadastrar em nosso serviço!</p>
-    <p>Por favor, clique no link abaixo para confirmar seu e-mail:</p>
-    <p><a href='{$linkConfirmacao}'>{$linkConfirmacao}</a></p>
-    <p>Se você não solicitou este cadastro, ignore este e-mail.</p>
+    <h1>Olá {$usuario['nome_usuario']},</h1>
+    <p>Recebemos uma solicitação para redefinir sua senha.</p>
+    <p>Clique no link abaixo para criar uma nova senha:</p>
+    <p><a href='{$linkRecuperacao}'>{$linkRecuperacao}</a></p>
+    <p>Se você não solicitou esta alteração, ignore este e-mail.</p>
+    <p>Este link expira em 1 hora.</p>
     <p>Atenciosamente,<br>Equipe " . SITE_NAME . "</p>
     ";
     
     if (!enviarEmail($email, $assunto, $mensagem)) {
-        error_log("Falha ao enviar e-mail de confirmação para: $email");
+        error_log("Falha ao enviar e-mail de recuperação para: $email");
+        throw new Exception("Falha ao enviar e-mail de recuperação");
     }
 
-    $response = ['success' => true, 'message' => 'Cadastro realizado com sucesso!'];
+    $response = [
+        'success' => true,
+        'message' => 'Um e-mail com instruções foi enviado para seu endereço.'
+    ];
 
 } catch (Exception $e) {
-    error_log("Erro no cadastro: " . $e->getMessage());
+    error_log("Erro na recuperação de senha: " . $e->getMessage());
     $response = [
         'success' => false,
         'message' => $e->getMessage()
@@ -122,9 +111,7 @@ try {
     if ($canEncrypt && $response) {
         $encryptedResponse = CryptoUtils::prepareEncryptedResponse($response);
         echo json_encode($encryptedResponse, JSON_UNESCAPED_UNICODE);
-        error_log("Resposta criptografada enviada com sucesso");
     } else {
-        error_log("Enviando resposta não criptografada. canEncrypt: " . ($canEncrypt ? 'true' : 'false'));
         $finalResponse = $response ?: [
             'success' => false,
             'message' => 'Erro interno do servidor'
@@ -135,7 +122,6 @@ try {
     if (ob_get_level()) {
         ob_end_flush();
     }
-    
 } catch (Exception $e) {
     if (ob_get_level()) {
         ob_clean();

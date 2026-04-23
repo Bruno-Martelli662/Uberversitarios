@@ -5,13 +5,12 @@
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Autenticação em Duas Etapas</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='style.css'>
-    <script src='main.js'></script>
+    <link rel='stylesheet' type='text/css' media='screen' href='../css/style.css'>
+    <script src='../js/main.js'></script>
 </head>
 <body>
 
     <header class="header">
-        <!-- logo ou nav podem entrar aqui futuramente -->
     </header>
 
     <div class="form-container">
@@ -21,9 +20,8 @@
             Insira o código gerado pelo seu Authenticator
         </p>
 
-        <form id="formMFA" action="verificarMFA.php" method="POST">
+        <form id="formMFA" action="../api/verificarMFA.php" method="POST">
 
-            <!-- CÓDIGO MFA -->
             <div class="input-group">
                 <input
                     type="text"

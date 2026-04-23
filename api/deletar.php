@@ -36,30 +36,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $delete->bind_param("i", $user['id']);
 
             if ($delete->execute()) {
-
-                // Mensagem + redirecionamento
                 echo "<h2>Conta deletada com sucesso!</h2>";
                 echo "<p>Redirecionando para a página inicial...</p>";
-
-                header("refresh:2;url=index.html");
+                header("refresh:2;url=../html/index.html");
                 exit();
-
             } else {
                 echo "Erro ao deletar.";
             }
-
             $delete->close();
-
         } else {
             echo "Senha incorreta.";
         }
-
     } else {
         echo "Usuário não encontrado.";
     }
-
     $stmt->close();
 }
-
 $conn->close();
 ?>

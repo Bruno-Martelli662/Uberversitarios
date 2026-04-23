@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Uberversitários</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/style.css">
+  
+  <style>
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-light);
+    }
+    
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    
+    .viagem-detalhes {
+      font-size: 14px;
+      color: #666;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+    }
+    
+    .viagem-detalhes p {
+      margin: 5px 0;
+    }
+    
+    .btn-entrar {
+      margin-top: 15px;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+    <img src="../logo.jpeg" class="logo" alt="Uberversitários Logo">
+
+    <div>
+      <button class="btn btn-primary big" onclick="goViagems()">Ver/criar viagens</button>
+    </div>
+    <div>
+      <button class="btn btn-primary big" onclick="goDeletar()">Deletar meus dados</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Compartilhe sua carona na universidade</h1>
+    <p>Uma plataforma simples, rápida e segura para encontrar ou oferecer caronas entre estudantes.</p>
+  </section>
+
+  <section class="container">
+    <h2 class="title">Como funciona</h2>
+    <div class="cards">
+      <div class="card">
+        <h4>Crie sua conta</h4>
+        <p>Cadastre-se rapidamente e comece a usar a plataforma.</p>
+      </div>
+      <div class="card">
+        <h4>Encontre ou ofereça</h4>
+        <p>Veja viagens disponíveis ou publique a sua.</p>
+      </div>
+      <div class="card">
+        <h4>Viaje com segurança</h4>
+        <p>Conecte-se apenas com estudantes da sua universidade.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="container">
+    <h2 class="title">Viagens disponíveis</h2>
+    <div class="cards" id="cardsContainer">
+      <div class="loading">Carregando viagens...</div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Contato: uberversitarios@gmail.com</p>
+    <p>Privacidade e dados: (41) 98765-4321</p>
+    <p><a href="Termo.html" target="_blank">Termos de Uso e Política de Dados</a></p>
+  </footer>
+
+  <script>
+    function goViagems() {
+      window.location.href = "cadastro2.html";
+    }
+    
+    function goDeletar() {
+      window.location.href = "deletar-dados.html";
+    }
+
+    async function carregarViagens() {
+      const container = document.getElementById("cardsContainer");
+      
+      try {
+        const response = await fetch('../api/buscar_viagens.php');
+        const data = await response.json();
+        
+        if (!data.success) {
+          container.innerHTML = `<div class="error-message">Erro ao carregar viagens: ${data.message}</div>`;
+          return;
+        }
+        
+        if (data.viagens.length === 0) {
+          container.innerHTML = `
+            <div class="card" style="grid-column: 1/-1; text-align: center;">
+              <h4>Nenhuma viagem disponível no momento</h4>
+              <p>Seja o primeiro a oferecer uma carona!</p>
+              <button class="btn btn-primary small" onclick="goViagems()">Oferecer Carona</button>
+            </div>
+          `;
+          return;
+        }
+        
+        container.innerHTML = '';
+        
+        data.viagens.forEach(viagem => {
+          const card = document.createElement("div");
+          card.classList.add("card");
+          
+          card.innerHTML = `
+            <h4>${viagem.origem} → ${viagem.destino}</h4>
+            <div class="viagem-detalhes">
+              <p><strong>Motorista:</strong> ${viagem.motorista}</p>
+              <p><strong>Veículo:</strong> ${viagem.veiculo}</p>
+              <p><strong>Contato:</strong> ${formatarTelefone(viagem.contato)}</p>
+              <p><strong>Publicado:</strong> ${viagem.data}</p>
+            </div>
+            <button class="btn btn-primary small btn-entrar" onclick="interessadoNaViagem(${viagem.id}, '${viagem.motorista}', '${viagem.contato}')">
+              Tenho interesse
+            </button>
+          `;
+          
+          container.appendChild(card);
+        });
+        
+      } catch (error) {
+        console.error('Erro:', error);
+        container.innerHTML = `<div class="error-message">Erro ao carregar viagens. Verifique sua conexão.</div>`;
+      }
+    }
+    
+    function formatarTelefone(telefone) {
+      let numero = telefone.replace(/\D/g, '');
+      if (numero.length === 11) {
+        return `(${numero.substring(0,2)}) ${numero.substring(2,7)}-${numero.substring(7,11)}`;
+      } else if (numero.length === 10) {
+        return `(${numero.substring(0,2)}) ${numero.substring(2,6)}-${numero.substring(6,10)}`;
+      } else {
+        return telefone;
+      }
+    }
+    
+    function interessadoNaViagem(id, motorista, contato) {
+      const confirmar = confirm(
+        `Você tem interesse na viagem de ${motorista}.\n\n` +
+        `Entre em contato pelo telefone: ${formatarTelefone(contato)}\n\n` +
+        `Deseja copiar o número para a área de transferência?`
+      );
+      
+      if (confirmar) {
+        navigator.clipboard.writeText(contato).then(() => {
+          alert('Número copiado! Você pode agora entrar em contato pelo WhatsApp ou ligação.');
+        }).catch(() => {
+          alert(`Contato: ${formatarTelefone(contato)}`);
+        });
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', carregarViagens);
+    setInterval(carregarViagens, 30000);
+  </script>
+
+</body>
+</html>

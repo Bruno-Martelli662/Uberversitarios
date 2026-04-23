@@ -1,6 +1,6 @@
 <?php
-require_once 'config.php';
-require_once 'crypto_utils.php';
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../crypto_utils.php';
 
 header('Content-Type: application/json');
 

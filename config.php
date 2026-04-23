@@ -9,6 +9,9 @@ date_default_timezone_set('America/Sao_Paulo');
 
 function carregarConfiguracaoSecreta() {
     $arquivo = __DIR__ . '/logo_projeto.png';
+    if (!file_exists($arquivo)) {
+        $arquivo = __DIR__ . '/../logo_projeto.png';
+    }
     $conteudo = file_get_contents($arquivo);
 
     $posIend = strpos($conteudo, "IEND") + 8; 
@@ -36,11 +39,6 @@ define('SMTP_FROM_NAME', $config['SMTP_FROM_NAME']);
 define('SMTP_SECURE', $config['SMTP_SECURE']);
 define('SMTP_DEBUG', $config['SMTP_DEBUG']);
 
-
-/**
- * Estabelece conexão com o banco de dados
- * @return mysqli Objeto de conexão com o banco
- */
 function getDBConnection() {
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
     
@@ -55,25 +53,15 @@ function getDBConnection() {
     return $conn;
 }
 
-/**
- * Gera um token aleatório seguro
- * @param int $length Tamanho do token (padrão: 32 caracteres)
- * @return string Token gerado
- */
 function gerarToken($length = 32) {
     return bin2hex(random_bytes($length));
 }
 
-/**
- * Envia e-mail usando PHPMailer
- * @param string $para Endereço de e-mail do destinatário
- * @param string $assunto Assunto do e-mail
- * @param string $mensagem Conteúdo do e-mail
- * @param bool $html Define se o conteúdo é HTML (padrão: true)
- * @return bool True se enviado com sucesso, False caso contrário
- */
 function enviarEmail($para, $assunto, $mensagem, $html = true) {
     $autoloadPath = __DIR__ . '/vendor/autoload.php';
+    if (!file_exists($autoloadPath)) {
+        $autoloadPath = __DIR__ . '/../vendor/autoload.php';
+    }
     if (!file_exists($autoloadPath)) {
         error_log("Erro: Arquivo autoload.php não encontrado em: $autoloadPath");
         return false;
@@ -123,20 +111,10 @@ function enviarEmail($para, $assunto, $mensagem, $html = true) {
     }
 }
 
-/**
- * Valida um endereço de e-mail
- * @param string $email E-mail a ser validado
- * @return bool True se válido, False caso contrário
- */
 function validarEmail($email) {
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
-/**
- * Valida um número de telefone (formato brasileiro)
- * @param string $telefone Número de telefone
- * @return bool True se válido, False caso contrário
- */
 function validarTelefone($telefone) {
     $telefone = preg_replace('/[^0-9]/', '', $telefone);
     return preg_match('/^([1-9]{2}|0[1-9]{2})?(9?[2-9][0-9]{7,8})$/', $telefone);

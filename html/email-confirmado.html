@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-mail Confirmado - <?= SITE_NAME ?></title>
+    <title>E-mail Confirmado - Uberversitários</title>
     
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -17,7 +17,6 @@
             margin: 0;
             background: var(--bg);
         }
-        
         .success-container {
             max-width: 460px;
             width: 100%;
@@ -29,25 +28,21 @@
             position: relative;
             z-index: 2;
         }
-        
         .status-icon {
             font-size: 80px;
             margin-bottom: 20px;
             display: block;
         }
-        
         .success-container h1 {
             font-size: 28px;
             margin-bottom: 15px;
             color: #4ade80;
         }
-        
         .success-container p {
             font-size: 17px;
             color: var(--text-light);
             margin-bottom: 35px;
         }
-        
         .btn {
             width: 100%;
             margin-bottom: 15px;
@@ -55,23 +50,16 @@
     </style>
 </head>
 <body>
-
     <div class="success-container form-container">
         <span class="status-icon">✅</span>
-        
         <h1 class="title" style="font-size: 28px; color: #4ade80; margin-bottom: 15px;">
             E-mail confirmado com sucesso!
         </h1>
-        
         <p>Sua conta foi ativada e agora você tem acesso completo ao sistema Uberversitarios.</p>
         <p class="subtitle" style="margin-top: 10px; font-size: 16px;">
             Faça login para começar a usar todas as funcionalidades.
         </p>
-        
-        <a href="login.html" class="btn btn-primary big">
-            Ir para o Login
-        </a>
-        
+        <a href="login.html" class="btn btn-primary big">Ir para o Login</a>
         <p class="small" style="margin-top: 25px; color: var(--text-light);">
             Ainda não tem conta? 
             <a href="cadastro.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">
@@ -79,6 +67,5 @@
             </a>
         </p>
     </div>
-
 </body>
 </html>

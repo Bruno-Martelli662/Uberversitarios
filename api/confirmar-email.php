@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require_once __DIR__ . '/../config.php';
 
 $token = $_GET['token'] ?? '';
 
@@ -25,8 +25,7 @@ $stmt->bind_param("i", $usuario['id']);
 $stmt->execute();
 $stmt->close();
 
-echo "E-mail confirmado com sucesso! Você já pode fazer login.";
-header("Location: email-confirmado.html");
+header("Location: ../html/email-confirmado.html");
 exit();
 $conn->close();
 ?>
