@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 10/04/2026 às 02:18
+-- Tempo de geração: 24/04/2026 às 00:53
 -- Versão do servidor: 10.4.32-MariaDB
--- Versão do PHP: 8.2.12
+-- Versão do PHP: 8.1.25
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -34,6 +34,20 @@ CREATE TABLE `sessoes` (
 -- --------------------------------------------------------
 
 --
+-- Estrutura para tabela `user_adm`
+--
+
+CREATE TABLE `user_adm` (
+  `id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `telegram_id` bigint(20) DEFAULT NULL,
+  `telegram_username` varchar(100) DEFAULT NULL,
+  `telegram_auth_token` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estrutura para tabela `usuarios`
 --
 
@@ -47,10 +61,7 @@ CREATE TABLE `usuarios` (
   `token_confirmacao` varchar(255) DEFAULT NULL,
   `google_2fa_secret` varchar(32) DEFAULT NULL,
   `google_2fa_ativado` tinyint(1) DEFAULT 0,
-
-  -- 🔴 NOVO CAMPO (ADMIN PANEL)
   `banido` tinyint(1) DEFAULT 0
-
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -72,27 +83,23 @@ CREATE TABLE `viagens` (
 
 -- --------------------------------------------------------
 
--- Índices para tabelas despejadas
---
+-- ÍNDICES
+-- --------------------------------------------------------
 
---
--- Índices de tabela `sessoes`
---
 ALTER TABLE `sessoes`
   ADD PRIMARY KEY (`id`),
   ADD KEY `usuario_id` (`usuario_id`);
 
---
--- Índices de tabela `usuarios`
---
+ALTER TABLE `user_adm`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `telegram_id` (`telegram_id`);
+
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
   ADD UNIQUE KEY `telefone` (`telefone`);
 
---
--- Índices de tabela `viagens`
---
 ALTER TABLE `viagens`
   ADD PRIMARY KEY (`id`),
   ADD KEY `motorista_id` (`motorista_id`),
@@ -101,10 +108,13 @@ ALTER TABLE `viagens`
 
 -- --------------------------------------------------------
 
--- AUTO_INCREMENT para tabelas despejadas
---
+-- AUTO_INCREMENT
+-- --------------------------------------------------------
 
 ALTER TABLE `sessoes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `user_adm`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `usuarios`
@@ -115,8 +125,8 @@ ALTER TABLE `viagens`
 
 -- --------------------------------------------------------
 
--- Restrições para tabelas
---
+-- RELAÇÕES (FOREIGN KEYS)
+-- --------------------------------------------------------
 
 ALTER TABLE `sessoes`
   ADD CONSTRAINT `sessoes_ibfk_1`
@@ -141,5 +151,5 @@ COMMIT;
 -- =========================
 -- IMPORTANTE
 -- =========================
--- NOVO CAMPO ADICIONADO:
--- usuarios.banido -> permite bloquear usuários no painel admin
+-- usuarios.banido -> bloqueio de usuários no painel admin
+-- user_adm -> controle de administradores via Telegram
