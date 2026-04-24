@@ -7,10 +7,13 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
+<header class="header">
+    <img src="../logo.jpeg" class="logo" alt="Uberversitários Logo">
+    </div>
+  </header>
     <div class="container">
         <div class="form-container">
-            <form action="../api/deletar.php" method="POST"
-                  onsubmit="return confirm('⚠️ ATENÇÃO!\n\nTem certeza que deseja deletar sua conta?\nEssa ação é permanente e não pode ser desfeita!');">
+            <form action="../api/deletar.php" method="POST" onsubmit="return validarExclusao();">
                 
                 <h2 class="title">Deletar conta</h2>
                 
@@ -22,13 +25,59 @@
                 <div class="input-group">
                     <label for="password">Senha</label>
                     <input type="password" id="password" name="password" required>
-                </div>                
-                
+                </div>
+
+                <h3>Selecione os dados para excluir:</h3>
+
+<div class="checkbox-group">
+  <label class="checkbox-item">
+    <input type="checkbox" class="custom-checkbox" name="delete[]" value="username">
+    <span>Nome de usuário</span>
+  </label>
+
+  <label class="checkbox-item">
+    <input type="checkbox" class="custom-checkbox" name="delete[]" value="email">
+    <span>Email</span>
+  </label>
+
+  <label class="checkbox-item">
+    <input type="checkbox" class="custom-checkbox" name="delete[]" value="telefone">
+    <span>Telefone</span>
+  </label>
+</div>
+
                 <button type="submit" class="btn btn-primary big" style="width: 100%;">
                     Deletar conta
+                </button>
+                <button type="button" class="btn" style="width: 100%;" 
+                    onclick="window.location.href='../index_cadastrado.html'">
+                    Cancelar
                 </button>
             </form>
         </div>
     </div>
+
+    <script>
+        function goLogin() {
+            window.location.href = "login.html";
+    }
+
+
+        function validarExclusao() {
+            const checkboxes = document.querySelectorAll('input[name="delete[]"]:checked');
+
+            if (checkboxes.length === 0) {
+                alert("Selecione pelo menos um dado para excluir.");
+                return false;
+            }
+
+            return confirm(
+                "ATENÇÃO!\n\n" +
+                "A exclusão de dados essenciais (como email, nome de usuário ou telefone) pode resultar na EXCLUSÃO PERMANENTE da conta.\n\n" +
+                "Isso acontece por conta das políticas da empresa.\n\n" +
+                "Deseja continuar?"
+            );
+        }
+    </script>
 </body>
 </html>
