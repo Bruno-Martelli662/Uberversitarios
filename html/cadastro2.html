@@ -152,6 +152,7 @@ button:hover {
 </head>
 
 <body>
+<script src="../js/script2.js"></script>
 <div class="main">
     <div class="lado esquerda">
         <h1>Cadastro de Viagem</h1>
@@ -172,8 +173,30 @@ button:hover {
         <div id="message" class="message"></div>
     </div>
 </div>
-
 <script>
+// ========== PREENCHIMENTO AUTOMÁTICO DOS CAMPOS ==========
+document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        fetch(`../api/usuario_logado.php?token=${encodeURIComponent(token)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const nomeInput = document.getElementById('Nome');
+                    const contatoInput = document.getElementById('Contato');
+                    if (nomeInput && contatoInput) {
+                        nomeInput.value = data.nome;
+                        contatoInput.value = data.telefone;
+                        nomeInput.readOnly = true;
+                        contatoInput.readOnly = true;
+                    }
+                }
+            })
+            .catch(console.error);
+    }
+});
+
+// ========== SUBMIT DO FORMULÁRIO ==========
 document.getElementById('formCadastro').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -205,7 +228,7 @@ document.getElementById('formCadastro').addEventListener('submit', async functio
         const result = await response.json();
         
         if (result.success) {
-            mostrarMensagem('✅' + result.message + ' Redirecionando...', 'success');
+            mostrarMensagem('✅ ' + result.message + ' Redirecionando...', 'success');
             document.getElementById('formCadastro').reset();
             setTimeout(() => {
                 window.location.href = 'index_cadastrado.html';

@@ -4,7 +4,7 @@ if (!token) {
     window.location.href = 'login.html';
 }
 
-fetch('verificar-sessao.php?token=' + encodeURIComponent(token))
+fetch('../api/verificar-sessao.php?token=' + encodeURIComponent(token))
     .then(response => response.json())
     .then(data => {
         if (!data.autenticado) {
