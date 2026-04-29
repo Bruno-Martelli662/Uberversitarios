@@ -1,8 +1,7 @@
 <?php
-ob_clean();
+ob_start();
 
 require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../crypto_utils.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -13,30 +12,39 @@ error_reporting(0);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 
-$response = null;
-$canEncrypt = false;
+$conn = null;
 
 try {
-    $data = CryptoUtils::processEncryptedRequest();
-    $canEncrypt = CryptoUtils::canSendEncryptedResponse();
-    
-    error_log("Dados recebidos: " . json_encode(array_diff_key($data, ['senha' => ''])));
-    
-    $nome = $data['nome'] ?? '';
-    $email = $data['email'] ?? '';
-    $telefone = $data['telefone'] ?? '';
-    $senhaHash = $data['senha'] ?? '';
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new Exception('Método não permitido.');
+    }
 
-    if (empty($nome)) {
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if (!is_array($data)) {
+        throw new Exception('JSON inválido ou vazio.');
+    }
+
+    error_log("Dados recebidos: " . json_encode(array_diff_key($data, ['senha' => ''])));
+
+    $nome = trim($data['nome'] ?? '');
+    $email = trim($data['email'] ?? '');
+    $telefone = trim($data['telefone'] ?? '');
+    $senhaHash = trim($data['senha'] ?? '');
+
+    if ($nome === '') {
         throw new Exception('Nome é obrigatório.');
     }
-    if (empty($email)) {
+
+    if ($email === '') {
         throw new Exception('E-mail é obrigatório.');
     }
-    if (empty($telefone)) {
+
+    if ($telefone === '') {
         throw new Exception('Telefone é obrigatório.');
     }
-    if (empty($senhaHash)) {
+
+    if ($senhaHash === '') {
         throw new Exception('Senha é obrigatória.');
     }
 
@@ -45,6 +53,7 @@ try {
     }
 
     $telefone = preg_replace('/[^0-9]/', '', $telefone);
+
     if (strlen($telefone) < 10 || strlen($telefone) > 11) {
         throw new Exception('Telefone inválido.');
     }
@@ -55,102 +64,89 @@ try {
     if (!$stmt) {
         throw new Exception('Erro na preparação da consulta: ' . $conn->error);
     }
-    
+
     $stmt->bind_param("s", $email);
+
     if (!$stmt->execute()) {
         throw new Exception('Erro na execução da consulta: ' . $stmt->error);
     }
-    
+
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
         throw new Exception('Este e-mail já está cadastrado.');
     }
+
     $stmt->close();
 
     $tokenConfirmacao = gerarToken();
 
-    $stmt = $conn->prepare("INSERT INTO usuarios (nome_usuario, email, telefone, senha_hash, token_confirmacao) VALUES (?, ?, ?, ?, ?)");
+    $stmt = $conn->prepare("
+        INSERT INTO usuarios 
+        (nome_usuario, email, telefone, senha_hash, token_confirmacao) 
+        VALUES (?, ?, ?, ?, ?)
+    ");
+
     if (!$stmt) {
         throw new Exception('Erro na preparação da inserção: ' . $conn->error);
     }
-    
+
     $stmt->bind_param("sssss", $nome, $email, $telefone, $senhaHash, $tokenConfirmacao);
 
     if (!$stmt->execute()) {
         error_log("Erro SQL ao inserir usuário: " . $stmt->error);
-        throw new Exception('Erro ao cadastrar usuário: ' . $stmt->error);
+        throw new Exception('Erro ao cadastrar usuário.');
     }
 
     $userId = $conn->insert_id;
-    error_log("Usuário cadastrado com sucesso. ID: $userId");
+    $stmt->close();
+
+    error_log("Usuário cadastrado com sucesso. ID: " . $userId);
 
     $linkConfirmacao = SITE_URL . "/api/confirmar-email.php?token=" . urlencode($tokenConfirmacao);
+
     $assunto = "Confirme seu e-mail";
+
     $mensagem = "
-    <h1>Olá {$nome},</h1>
-    <p>Obrigado por se cadastrar em nosso serviço!</p>
-    <p>Por favor, clique no link abaixo para confirmar seu e-mail:</p>
-    <p><a href='{$linkConfirmacao}'>{$linkConfirmacao}</a></p>
-    <p>Se você não solicitou este cadastro, ignore este e-mail.</p>
-    <p>Atenciosamente,<br>Equipe " . SITE_NAME . "</p>
+        <h1>Olá {$nome},</h1>
+        <p>Obrigado por se cadastrar em nosso serviço!</p>
+        <p>Por favor, clique no link abaixo para confirmar seu e-mail:</p>
+        <p><a href='{$linkConfirmacao}'>{$linkConfirmacao}</a></p>
+        <p>Se você não solicitou este cadastro, ignore este e-mail.</p>
+        <p>Atenciosamente,<br>Equipe " . SITE_NAME . "</p>
     ";
-    
+
     if (!enviarEmail($email, $assunto, $mensagem)) {
-        error_log("Falha ao enviar e-mail de confirmação para: $email");
+        error_log("Falha ao enviar e-mail de confirmação para: " . $email);
     }
 
-    $response = ['success' => true, 'message' => 'Cadastro realizado com sucesso!'];
+    $response = [
+        'success' => true,
+        'message' => 'Cadastro realizado com sucesso!'
+    ];
 
 } catch (Exception $e) {
     error_log("Erro no cadastro: " . $e->getMessage());
+
     $response = [
         'success' => false,
         'message' => $e->getMessage()
     ];
-    
-    $canEncrypt = false;
+
 } finally {
-    if (isset($conn)) $conn->close();
+    if ($conn) {
+        $conn->close();
+    }
 }
 
-try {
-    if (ob_get_level()) {
-        ob_clean();
-    }
-    
-    if ($canEncrypt && $response) {
-        $encryptedResponse = CryptoUtils::prepareEncryptedResponse($response);
-        echo json_encode($encryptedResponse, JSON_UNESCAPED_UNICODE);
-        error_log("Resposta criptografada enviada com sucesso");
-    } else {
-        error_log("Enviando resposta não criptografada. canEncrypt: " . ($canEncrypt ? 'true' : 'false'));
-        $finalResponse = $response ?: [
-            'success' => false,
-            'message' => 'Erro interno do servidor'
-        ];
-        echo json_encode($finalResponse, JSON_UNESCAPED_UNICODE);
-    }
-    
-    if (ob_get_level()) {
-        ob_end_flush();
-    }
-    
-} catch (Exception $e) {
-    if (ob_get_level()) {
-        ob_clean();
-    }
-    
-    error_log("Erro ao preparar resposta final: " . $e->getMessage());
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Erro interno do servidor ao processar resposta'
-    ], JSON_UNESCAPED_UNICODE);
-    
-    if (ob_get_level()) {
-        ob_end_flush();
-    }
+if (ob_get_level()) {
+    ob_clean();
+}
+
+echo json_encode($response, JSON_UNESCAPED_UNICODE);
+
+if (ob_get_level()) {
+    ob_end_flush();
 }
 
 exit;

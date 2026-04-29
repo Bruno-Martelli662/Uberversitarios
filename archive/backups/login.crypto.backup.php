@@ -1,50 +1,24 @@
 <?php
-ob_start();
-
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../crypto_utils.php';
 require_once __DIR__ . '/../GoogleAuthenticator.php';
 
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type');
-
-$conn = null;
+header('Content-Type: application/json');
 
 try {
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Método não permitido.');
-    }
-
-    $data = json_decode(file_get_contents('php://input'), true);
-
-    if (!is_array($data)) {
-        throw new Exception('JSON inválido ou vazio.');
-    }
-
-    $email = trim($data['email'] ?? '');
-    $senhaHash = trim($data['senha'] ?? '');
+    $data = CryptoUtils::processEncryptedRequest();
+    $email = $data['email'] ?? '';
+    $senhaHash = $data['senha'] ?? '';
     $codigo2FA = $data['codigo2FA'] ?? null;
 
-    if ($email === '' || $senhaHash === '') {
+    if (empty($email) || empty($senhaHash)) {
         throw new Exception('E-mail e senha são obrigatórios.');
     }
 
     $conn = getDBConnection();
-
-    $stmt = $conn->prepare("
-        SELECT id, nome_usuario, senha_hash, confirmado, google_2fa_secret, google_2fa_ativado
-        FROM usuarios
-        WHERE email = ?
-    ");
-
-    if (!$stmt) {
-        throw new Exception('Erro na preparação da consulta.');
-    }
-
+    $stmt = $conn->prepare("SELECT id, nome_usuario, senha_hash, confirmado, google_2fa_secret, google_2fa_ativado FROM usuarios WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
-
     $result = $stmt->get_result();
 
     if ($result->num_rows === 0) {
@@ -52,7 +26,6 @@ try {
     }
 
     $usuario = $result->fetch_assoc();
-    $stmt->close();
 
     if ($senhaHash !== $usuario['senha_hash']) {
         throw new Exception('E-mail ou senha incorretos.');
@@ -65,18 +38,11 @@ try {
     $tokenSessao = gerarToken();
     $expiracao = date('Y-m-d H:i:s', strtotime('+1 day'));
 
-    $stmt = $conn->prepare("
-        INSERT INTO sessoes (usuario_id, token_sessao, data_expiracao)
-        VALUES (?, ?, ?)
-    ");
-
-    if (!$stmt) {
-        throw new Exception('Erro ao criar sessão.');
-    }
-
+    $stmt = $conn->prepare("INSERT INTO sessoes (usuario_id, token_sessao, data_expiracao) VALUES (?, ?, ?)");
     $stmt->bind_param("iss", $usuario['id'], $tokenSessao, $expiracao);
     $stmt->execute();
-    $stmt->close();
+
+    $response = [];
 
     if (empty($usuario['google_2fa_ativado']) || $usuario['google_2fa_ativado'] == 0) {
         $response = [
@@ -85,10 +51,10 @@ try {
             'nome' => $usuario['nome_usuario'],
             'requires2FASetup' => true
         ];
-    } else {
+    } elseif ($usuario['google_2fa_ativado']) {
         $ga = new GoogleAuthenticator();
-
-        if ($codigo2FA === null || $codigo2FA === '') {
+        
+        if ($codigo2FA === null) {
             $response = [
                 'success' => true,
                 'token' => $tokenSessao,
@@ -107,28 +73,17 @@ try {
     }
 
 } catch (Exception $e) {
-    error_log("Erro no login: " . $e->getMessage());
-
     $response = [
         'success' => false,
         'message' => $e->getMessage()
     ];
-
 } finally {
-    if ($conn) {
-        $conn->close();
-    }
+    if (isset($conn)) $conn->close();
 }
 
-if (ob_get_level()) {
-    ob_clean();
-}
-
-echo json_encode($response, JSON_UNESCAPED_UNICODE);
-
-if (ob_get_level()) {
-    ob_end_flush();
-}
-
-exit;
+echo json_encode(CryptoUtils::prepareEncryptedResponse(
+    $response,
+    CryptoUtils::getLastDecryptedKey(),
+    CryptoUtils::getLastIV()
+));
 ?>

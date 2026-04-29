@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel do Administrador</title>
 
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="../css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -44,7 +44,7 @@
 // USUÁRIOS
 // ==========================
 async function carregarUsuarios() {
-    const res = await fetch("api/usuarios.php");
+    const res = await fetch("../api/usuarios.php");
     const usuarios = await res.json();
 
     const container = document.getElementById("usuarios");
@@ -70,7 +70,7 @@ async function carregarUsuarios() {
 // VIAGENS
 // ==========================
 async function carregarViagens() {
-    const res = await fetch("api/viagens.php");
+    const res = await fetch("../api/viagens.php");
     const viagens = await res.json();
 
     const container = document.getElementById("viagens");
