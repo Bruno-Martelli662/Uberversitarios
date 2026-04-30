@@ -31,7 +31,7 @@ try {
     $email = trim($data['email'] ?? '');
     $telefone = trim($data['telefone'] ?? '');
     $senhaHash = trim($data['senha'] ?? '');
-
+    
     if ($nome === '') {
         throw new Exception('Nome é obrigatório.');
     }
@@ -61,6 +61,7 @@ try {
     $conn = getDBConnection();
 
     $stmt = $conn->prepare("SELECT id FROM usuarios WHERE email = ?");
+    
     if (!$stmt) {
         throw new Exception('Erro na preparação da consulta: ' . $conn->error);
     }
@@ -86,13 +87,13 @@ try {
         (nome_usuario, email, telefone, senha_hash, token_confirmacao) 
         VALUES (?, ?, ?, ?, ?)
     ");
-
+    
     if (!$stmt) {
         throw new Exception('Erro na preparação da inserção: ' . $conn->error);
     }
 
     $stmt->bind_param("sssss", $nome, $email, $telefone, $senhaHash, $tokenConfirmacao);
-
+    
     if (!$stmt->execute()) {
         error_log("Erro SQL ao inserir usuário: " . $stmt->error);
         throw new Exception('Erro ao cadastrar usuário.');
@@ -100,20 +101,23 @@ try {
 
     $userId = $conn->insert_id;
     $stmt->close();
+    
+    // REGISTRO DO LOG AQUI
+    registrarLog($userId, 'ESCRITA', "Novo usuário cadastrado com e-mail: $email");
 
     error_log("Usuário cadastrado com sucesso. ID: " . $userId);
 
     $linkConfirmacao = SITE_URL . "/api/confirmar-email.php?token=" . urlencode($tokenConfirmacao);
 
     $assunto = "Confirme seu e-mail";
-
     $mensagem = "
         <h1>Olá {$nome},</h1>
         <p>Obrigado por se cadastrar em nosso serviço!</p>
         <p>Por favor, clique no link abaixo para confirmar seu e-mail:</p>
         <p><a href='{$linkConfirmacao}'>{$linkConfirmacao}</a></p>
         <p>Se você não solicitou este cadastro, ignore este e-mail.</p>
-        <p>Atenciosamente,<br>Equipe " . SITE_NAME . "</p>
+        <p>Atenciosamente,<br>Equipe " .
+        SITE_NAME . "</p>
     ";
 
     if (!enviarEmail($email, $assunto, $mensagem)) {
@@ -127,12 +131,10 @@ try {
 
 } catch (Exception $e) {
     error_log("Erro no cadastro: " . $e->getMessage());
-
     $response = [
         'success' => false,
         'message' => $e->getMessage()
     ];
-
 } finally {
     if ($conn) {
         $conn->close();

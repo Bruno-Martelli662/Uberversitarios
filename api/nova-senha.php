@@ -46,7 +46,7 @@ try {
         WHERE token_recuperacao = ? 
         AND token_recuperacao_expira > NOW()
     ");
-
+    
     if (!$stmt) {
         throw new Exception('Erro na preparação da consulta: ' . $conn->error);
     }
@@ -72,7 +72,7 @@ try {
         SET senha_hash = ?, token_recuperacao = NULL, token_recuperacao_expira = NULL 
         WHERE id = ?
     ");
-
+    
     if (!$stmt) {
         throw new Exception('Erro na preparação da atualização: ' . $conn->error);
     }
@@ -85,9 +85,12 @@ try {
     }
 
     $stmt->close();
+    
+    // REGISTRO DO LOG AQUI
+    registrarLog($usuarioId, 'ALTERACAO', 'Senha redefinida com sucesso via token de recuperação.');
 
     error_log("Senha alterada com sucesso para usuário ID: " . $usuarioId);
-
+    
     $response = [
         'success' => true,
         'message' => 'Senha alterada com sucesso! Você será redirecionado para a página de login.'
@@ -95,12 +98,10 @@ try {
 
 } catch (Exception $e) {
     error_log("Erro em nova-senha.php: " . $e->getMessage());
-
     $response = [
         'success' => false,
         'message' => $e->getMessage()
     ];
-
 } finally {
     if ($conn) {
         $conn->close();

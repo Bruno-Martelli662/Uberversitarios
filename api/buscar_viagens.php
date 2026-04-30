@@ -1,18 +1,6 @@
 <?php
 header('Content-Type: application/json');
-
-$host = 'localhost';
-$dbname = 'sistema_autenticacao';
-$username = 'root';
-$password = '';
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'Erro de conexão: ' . $e->getMessage()]);
-    exit;
-}
+require_once __DIR__ . '/../config.php'; // Adicionado para carregar as funções globais
 
 try {
     $sql = "SELECT v.*, u.nome_usuario as motorista_nome 
@@ -20,10 +8,13 @@ try {
             JOIN usuarios u ON v.motorista_id = u.id 
             WHERE v.passageiro_id IS NULL 
             ORDER BY v.criada_em DESC";
-    
+            
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $viagens = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // REGISTRO DO LOG AQUI
+    registrarLog(null, 'LEITURA', 'Busca realizada na lista de viagens disponíveis.');
     
     $viagens_formatadas = [];
     foreach ($viagens as $viagem) {

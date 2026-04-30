@@ -83,6 +83,21 @@ CREATE TABLE `viagens` (
 
 -- --------------------------------------------------------
 
+--
+-- Estrutura para tabela `logs_acao`
+--
+
+CREATE TABLE `logs_acao` (
+  `id` int(11) NOT NULL,
+  `usuario_id` int(11) DEFAULT NULL,
+  `acao` enum('LEITURA', 'ESCRITA', 'ALTERACAO', 'EXCLUSAO') NOT NULL,
+  `descricao` text NOT NULL,
+  `ip_origem` varchar(45) NOT NULL,
+  `criado_em` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
 -- ÍNDICES
 -- --------------------------------------------------------
 
@@ -106,6 +121,10 @@ ALTER TABLE `viagens`
   ADD KEY `passageiro_id` (`passageiro_id`),
   ADD KEY `contato` (`contato`);
 
+ALTER TABLE `logs_acao`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `usuario_id` (`usuario_id`);
+
 -- --------------------------------------------------------
 
 -- AUTO_INCREMENT
@@ -121,6 +140,9 @@ ALTER TABLE `usuarios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `viagens`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `logs_acao`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 -- --------------------------------------------------------
@@ -144,6 +166,11 @@ ALTER TABLE `viagens`
 
   ADD CONSTRAINT `viagens_ibfk_3`
   FOREIGN KEY (`contato`) REFERENCES `usuarios` (`telefone`)
+  ON DELETE SET NULL;
+
+ALTER TABLE `logs_acao`
+  ADD CONSTRAINT `logs_acao_ibfk_1`
+  FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`)
   ON DELETE SET NULL;
 
 COMMIT;
