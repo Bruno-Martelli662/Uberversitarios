@@ -1,6 +1,5 @@
 // ==================== SCRIPT.JS LIMPO ====================
 // Cadastro, login, recuperação de senha e 2FA
-// Sem criptografia híbrida RSA/AES
 // =========================================================
 
 // ==================== FUNÇÕES AUXILIARES ====================
