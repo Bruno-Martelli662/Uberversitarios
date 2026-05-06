@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ativar 2FA</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="form-container">
+        <h2 class="title">Ativar 2FA Telegram</h2>
+
+        <p style="text-align:center;">
+            1. Clique no botão abaixo<br>
+            2. Envie a mensagem no Telegram<br>
+            3. Volte aqui e clique em verificar
+        </p>
+
+        <!-- BOTÃO DO TELEGRAM -->
+        <div style="text-align: center; margin: 20px 0;">
+            <a id="bot-link" href="#" target="_blank">
+                <button onclick="window.open('https://web.telegram.org/k/#@uberversitarios_bot', '_blank')"class="btn btn-primary big" style="width: 100%;">
+                    Conversar com o BOT
+                </button>
+            </a>
+        </div>
+
+        <!-- MOSTRAR CÓDIGO -->
+        <div style="text-align:center;">
+            <small>Seu código:</small>
+            <p id="codigo" style="font-size: 20px;"></p>
+        </div>
+
+        <!-- BOTÃO VERIFICAR -->
+        <button id="ativar-btn" class="btn btn-primary big" style="width: 100%;">
+            Já enviei o código
+        </button>
+
+        <div id="mensagem" style="margin-top: 15px; text-align: center;"></div>
+    </div>
+</div>
+
+<script>
+// pegar código e link do PHP
+fetch('gerar_codigo.php')
+.then(res => res.json())
+.then(data => {
+    document.getElementById('codigo').innerText = data.codigo;
+    document.getElementById('bot-link').href = data.link;
+});
+
+// verificar conexão
+document.getElementById('ativar-btn').addEventListener('click', () => {
+    fetch('verificar_telegram.php')
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('mensagem').innerHTML = data.mensagem;
+    });
+});
+</script>
+
+</body>
+</html>
