@@ -11,7 +11,7 @@
 </header>
 <div class="container">
     <div class="form-container">
-        <form action="../api/deletar.php" method="POST" onsubmit="return validarExclusao();">
+        <form id="formDeletar">
             <h2 class="title" style="color: #ff5a5f;">Atenção: Exclusão Definitiva</h2>
             <p style="text-align: center; color: #777; margin-bottom: 20px;">
                 Para apagar sua conta, confirme suas credenciais. Seus dados públicos serão apagados, e uma cópia isolada será mantida apenas para auditoria legal.
@@ -27,7 +27,7 @@
                 <input type="password" id="password" name="password" required>
             </div>
 
-            <button type="submit" class="btn btn-primary big" style="width: 100%; margin-bottom: 10px;">
+            <button type="submit" id="btnDeletar" class="btn btn-primary big" style="width: 100%; margin-bottom: 10px;">
                 Confirmar Exclusão
             </button>
             <button type="button" class="btn btn-outline" style="width: 100%;" onclick="window.location.href='exclusao.html'">
@@ -36,10 +36,50 @@
         </form>
     </div>
 </div>
+
 <script>
-    function validarExclusao() {
-        return confirm("Tem certeza absoluta? Esta ação não pode ser desfeita e você perderá o acesso à plataforma.");
-    }
+    document.getElementById('formDeletar').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Impede a página de recarregar
+        
+        if (!confirm("Tem certeza absoluta? Esta ação não pode ser desfeita e você perderá o acesso à plataforma.")) {
+            return;
+        }
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const btn = document.getElementById('btnDeletar');
+        const textoOriginal = btn.innerHTML;
+
+        btn.innerHTML = 'Processando...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('../api/deletar.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, password: password })
+            });
+            
+            const result = await response.json();
+
+            if (result.success) {
+                alert(result.message);
+                // Limpa o token do armazenamento local (encerra a sessão no front-end)
+                localStorage.removeItem('authToken');
+                // Redireciona para a página inicial deslogada
+                window.location.href = 'index.html';
+            } else {
+                alert("Erro: " + result.message);
+            }
+        } catch (error) {
+            alert("Erro ao conectar com o servidor. Verifique sua conexão.");
+            console.error(error);
+        } finally {
+            // Restaura o botão caso tenha dado erro
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        }
+    });
 </script>
 </body>
 </html>
