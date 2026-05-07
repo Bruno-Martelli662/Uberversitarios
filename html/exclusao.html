@@ -7,18 +7,9 @@
   <link rel="stylesheet" href="../css/style.css">
   <style>
     .dados-box {
-      background: #f9f9f9;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 15px;
-      text-align: left;
-      font-size: 14px;
-      max-height: 300px;
-      overflow-y: auto;
-      margin-bottom: 20px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      color: #333;
+      background: #f9f9f9; border: 1px solid #ddd; border-radius: 10px;
+      padding: 15px; text-align: left; font-size: 14px; max-height: 300px;
+      overflow-y: auto; margin-bottom: 20px; white-space: pre-wrap; color: #333;
     }
   </style>
 </head>
@@ -27,66 +18,40 @@
   <header class="header">
     <img src="../logo.jpeg" class="logo" alt="Logo">
     <div>
-      <button class="btn btn-outline" onclick="goHome()">Início</button>
+      <button class="btn btn-outline" onclick="window.location.href='index_cadastrado.html'">Voltar</button>
     </div>
   </header>
 
   <section class="section">
-    <h1 class="title">Privacidade e Controle de Dados</h1>
-    <p class="subtitle">
-      De acordo com a LGPD, você tem o direito de visualizar todos os dados que temos sobre você antes de solicitar a exclusão.
-    </p>
+    <h1 class="title">Seus Dados no Sistema</h1>
+    <p class="subtitle">Em conformidade com a LGPD, aqui estão todas as informações vinculadas à sua conta.</p>
   </section>
 
   <section class="container">
     <div class="form-container" style="max-width: 600px;">
-      <h2>Seus Dados no Sistema</h2>
-      <p style="color:#777; margin-bottom: 10px;">Abaixo estão as informações vinculadas à sua conta:</p>
-      
       <div id="dados-view" class="dados-box">Carregando seus dados...</div>
 
       <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
 
-      <h2 style="color:#ff5a5f;">Excluir conta completamente</h2>
+      <h2 style="color:#ff5a5f;">Excluir Conta</h2>
       <p style="margin-bottom:15px; color:#777;">
-        Esta ação removerá permanentemente sua conta da base ativa. Por exigência legal (auditoria e proteção), uma cópia criptografada/arquivada será mantida isolada pelo tempo previsto em lei.
+        Para garantir a segurança da operação, você precisará confirmar sua identidade na próxima tela.
       </p>
-      
-      <div class="input-group">
-        <input type="checkbox" id="confirmDelete">
-        <label for="confirmDelete" style="font-size: 14px; font-weight: 600;">
-          Confirmo que desejo excluir minha conta
-        </label>
-      </div>
-      <button class="btn btn-primary" onclick="deleteAccount()" style="width: 100%;">
-        Excluir minha conta
+      <button class="btn btn-primary" onclick="window.location.href='deletar-dados.html'" style="width: 100%;">
+        Avançar para Exclusão
       </button>
     </div>
   </section>
-
-  <footer>
-    <p>Contato: uberversitarios@gmail.com</p>
-    <p>Direitos garantidos pela LGPD</p>
-  </footer>
-
   <script>
-    function goHome() {
-      window.location.href = "index_cadastrado.html";
-    }
-
-    // Carrega os dados assim que a página abre
     document.addEventListener('DOMContentLoaded', async () => {
       const token = localStorage.getItem('authToken');
       const box = document.getElementById('dados-view');
-      
       if (!token) return;
 
       try {
         const response = await fetch(`../api/meus_dados.php?token=${encodeURIComponent(token)}`);
         const result = await response.json();
-
         if (result.success) {
-          // Formata o JSON para ficar legível para o usuário
           box.textContent = JSON.stringify(result.dados, null, 4);
         } else {
           box.textContent = "Erro ao carregar os dados: " + result.message;
@@ -95,41 +60,6 @@
         box.textContent = "Erro de conexão ao buscar os dados.";
       }
     });
-
-    async function deleteAccount() {
-      const confirmChecked = document.getElementById("confirmDelete").checked;
-      
-      if (!confirmChecked) {
-        alert("Você precisa marcar a caixa confirmando a exclusão.");
-        return;
-      }
-
-      if(!confirm("Atenção: Esta ação é irreversível. Deseja mesmo excluir sua conta?")) {
-        return;
-      }
-
-      const token = localStorage.getItem('authToken');
-      
-      try {
-        const response = await fetch('../api/excluir_conta_lgpd.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: token })
-        });
-        
-        const result = await response.json();
-
-        if (result.success) {
-            alert("Conta excluída com sucesso!");
-            localStorage.removeItem('authToken');
-            window.location.href = "index.html";
-        } else {
-            alert("Erro: " + result.message);
-        }
-      } catch (error) {
-        alert("Erro ao tentar excluir a conta. Tente novamente mais tarde.");
-      }
-    }
   </script>
 </body>
 </html>

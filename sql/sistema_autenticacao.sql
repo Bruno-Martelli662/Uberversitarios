@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 24/04/2026 às 00:53
+-- Tempo de geração: 07/05/2026
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.1.25
 
@@ -59,6 +59,8 @@ CREATE TABLE `usuarios` (
   `senha_hash` varchar(255) NOT NULL,
   `confirmado` tinyint(1) DEFAULT 0,
   `token_confirmacao` varchar(255) DEFAULT NULL,
+  `token_recuperacao` varchar(255) DEFAULT NULL,
+  `token_recuperacao_expira` datetime DEFAULT NULL,
   `google_2fa_secret` varchar(32) DEFAULT NULL,
   `google_2fa_ativado` tinyint(1) DEFAULT 0,
   `banido` tinyint(1) DEFAULT 0
@@ -98,6 +100,20 @@ CREATE TABLE `logs_acao` (
 
 -- --------------------------------------------------------
 
+--
+-- Estrutura para tabela `lgpd_arquivamento` (NOVA TABELA LGPD)
+--
+
+CREATE TABLE `lgpd_arquivamento` (
+  `id` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `dados_json` JSON NOT NULL,
+  `data_exclusao` datetime DEFAULT current_timestamp(),
+  `ip_origem` varchar(45) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
 -- ÍNDICES
 -- --------------------------------------------------------
 
@@ -125,6 +141,9 @@ ALTER TABLE `logs_acao`
   ADD PRIMARY KEY (`id`),
   ADD KEY `usuario_id` (`usuario_id`);
 
+ALTER TABLE `lgpd_arquivamento`
+  ADD PRIMARY KEY (`id`);
+
 -- --------------------------------------------------------
 
 -- AUTO_INCREMENT
@@ -143,6 +162,9 @@ ALTER TABLE `viagens`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `logs_acao`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `lgpd_arquivamento`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 -- --------------------------------------------------------
@@ -179,46 +201,25 @@ COMMIT;
 -- USUÁRIOS SEGREGADOS MYSQL
 -- =========================
 
-CREATE USER IF NOT EXISTS 'uberv_auth'@'localhost'
-IDENTIFIED BY 'Auth@2026!segura';
-
-CREATE USER IF NOT EXISTS 'uberv_read'@'localhost'
-IDENTIFIED BY 'Read@2026!segura';
-
-CREATE USER IF NOT EXISTS 'uberv_write'@'localhost'
-IDENTIFIED BY 'Write@2026!segura';
-
-CREATE USER IF NOT EXISTS 'uberv_admin'@'localhost'
-IDENTIFIED BY 'Admin@2026!segura';
+CREATE USER IF NOT EXISTS 'uberv_auth'@'localhost' IDENTIFIED BY 'Auth@2026!segura';
+CREATE USER IF NOT EXISTS 'uberv_read'@'localhost' IDENTIFIED BY 'Read@2026!segura';
+CREATE USER IF NOT EXISTS 'uberv_write'@'localhost' IDENTIFIED BY 'Write@2026!segura';
+CREATE USER IF NOT EXISTS 'uberv_admin'@'localhost' IDENTIFIED BY 'Admin@2026!segura';
 
 -- Atualiza senha caso usuário já exista
-ALTER USER 'uberv_auth'@'localhost'
-IDENTIFIED BY 'Auth@2026!segura';
-
-ALTER USER 'uberv_read'@'localhost'
-IDENTIFIED BY 'Read@2026!segura';
-
-ALTER USER 'uberv_write'@'localhost'
-IDENTIFIED BY 'Write@2026!segura';
-
-ALTER USER 'uberv_admin'@'localhost'
-IDENTIFIED BY 'Admin@2026!segura';
+ALTER USER 'uberv_auth'@'localhost' IDENTIFIED BY 'Auth@2026!segura';
+ALTER USER 'uberv_read'@'localhost' IDENTIFIED BY 'Read@2026!segura';
+ALTER USER 'uberv_write'@'localhost' IDENTIFIED BY 'Write@2026!segura';
+ALTER USER 'uberv_admin'@'localhost' IDENTIFIED BY 'Admin@2026!segura';
 
 -- =========================
 -- LIMPA PERMISSÕES ANTIGAS
 -- =========================
 
-REVOKE ALL PRIVILEGES, GRANT OPTION
-FROM 'uberv_auth'@'localhost';
-
-REVOKE ALL PRIVILEGES, GRANT OPTION
-FROM 'uberv_read'@'localhost';
-
-REVOKE ALL PRIVILEGES, GRANT OPTION
-FROM 'uberv_write'@'localhost';
-
-REVOKE ALL PRIVILEGES, GRANT OPTION
-FROM 'uberv_admin'@'localhost';
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'uberv_auth'@'localhost';
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'uberv_read'@'localhost';
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'uberv_write'@'localhost';
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'uberv_admin'@'localhost';
 
 -- =========================
 -- AUTH
@@ -226,64 +227,37 @@ FROM 'uberv_admin'@'localhost';
 -- recuperação de senha, 2FA
 -- =========================
 
-GRANT SELECT, INSERT, UPDATE, DELETE
-ON sistema_autenticacao.usuarios
-TO 'uberv_auth'@'localhost';
-
-GRANT SELECT, INSERT, UPDATE, DELETE
-ON sistema_autenticacao.sessoes
-TO 'uberv_auth'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.usuarios TO 'uberv_auth'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.sessoes TO 'uberv_auth'@'localhost';
+GRANT INSERT ON sistema_autenticacao.lgpd_arquivamento TO 'uberv_auth'@'localhost'; -- Permissão para arquivar dados na exclusão
 
 -- =========================
 -- READ
 -- leitura pública/listagens
 -- =========================
 
-GRANT SELECT
-ON sistema_autenticacao.usuarios
-TO 'uberv_read'@'localhost';
-
-GRANT SELECT
-ON sistema_autenticacao.viagens
-TO 'uberv_read'@'localhost';
+GRANT SELECT ON sistema_autenticacao.usuarios TO 'uberv_read'@'localhost';
+GRANT SELECT ON sistema_autenticacao.viagens TO 'uberv_read'@'localhost';
 
 -- =========================
 -- WRITE
 -- cadastro/alteração viagens
 -- =========================
 
-GRANT SELECT, INSERT, UPDATE
-ON sistema_autenticacao.usuarios
-TO 'uberv_write'@'localhost';
-
-GRANT SELECT, INSERT, UPDATE
-ON sistema_autenticacao.viagens
-TO 'uberv_write'@'localhost';
+GRANT SELECT, INSERT, UPDATE ON sistema_autenticacao.usuarios TO 'uberv_write'@'localhost';
+GRANT SELECT, INSERT, UPDATE ON sistema_autenticacao.viagens TO 'uberv_write'@'localhost';
 
 -- =========================
 -- ADMIN
 -- painel administrativo
 -- =========================
 
-GRANT SELECT, INSERT, UPDATE, DELETE
-ON sistema_autenticacao.usuarios
-TO 'uberv_admin'@'localhost';
-
-GRANT SELECT, INSERT, UPDATE, DELETE
-ON sistema_autenticacao.viagens
-TO 'uberv_admin'@'localhost';
-
-GRANT SELECT, INSERT, UPDATE, DELETE
-ON sistema_autenticacao.sessoes
-TO 'uberv_admin'@'localhost';
-
-GRANT SELECT, INSERT, UPDATE, DELETE
-ON sistema_autenticacao.user_adm
-TO 'uberv_admin'@'localhost';
-
-GRANT SELECT, INSERT, UPDATE, DELETE
-ON sistema_autenticacao.logs_acao
-TO 'uberv_admin'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.usuarios TO 'uberv_admin'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.viagens TO 'uberv_admin'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.sessoes TO 'uberv_admin'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.user_adm TO 'uberv_admin'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.logs_acao TO 'uberv_admin'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.lgpd_arquivamento TO 'uberv_admin'@'localhost'; -- Permissão para gerenciar o cofre LGPD
 
 FLUSH PRIVILEGES;
 
@@ -295,9 +269,3 @@ SHOW GRANTS FOR 'uberv_auth'@'localhost';
 SHOW GRANTS FOR 'uberv_read'@'localhost';
 SHOW GRANTS FOR 'uberv_write'@'localhost';
 SHOW GRANTS FOR 'uberv_admin'@'localhost';
-
--- =========================
--- IMPORTANTE
--- =========================
--- usuarios.banido -> bloqueio de usuários no painel admin
--- user_adm -> controle de administradores via Telegram

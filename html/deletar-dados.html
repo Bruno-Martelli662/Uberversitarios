@@ -2,82 +2,44 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deletar dados do usuário</title>
+    <title>Confirmar Exclusão</title>
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
 <header class="header">
     <img src="../logo.jpeg" class="logo" alt="Uberversitários Logo">
+</header>
+<div class="container">
+    <div class="form-container">
+        <form action="../api/deletar.php" method="POST" onsubmit="return validarExclusao();">
+            <h2 class="title" style="color: #ff5a5f;">Atenção: Exclusão Definitiva</h2>
+            <p style="text-align: center; color: #777; margin-bottom: 20px;">
+                Para apagar sua conta, confirme suas credenciais. Seus dados públicos serão apagados, e uma cópia isolada será mantida apenas para auditoria legal.
+            </p>
+            
+            <div class="input-group">
+                <label for="email">E-mail da Conta</label>
+                <input type="email" id="email" name="email" required>
+            </div>                
+            
+            <div class="input-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary big" style="width: 100%; margin-bottom: 10px;">
+                Confirmar Exclusão
+            </button>
+            <button type="button" class="btn btn-outline" style="width: 100%;" onclick="window.location.href='exclusao.html'">
+                Cancelar
+            </button>
+        </form>
     </div>
-  </header>
-    <div class="container">
-        <div class="form-container">
-            <form action="../api/deletar.php" method="POST" onsubmit="return validarExclusao();">
-                
-                <h2 class="title">Deletar conta</h2>
-                
-                <div class="input-group">
-                    <label for="email">E-mail</label>
-                    <input type="email" id="email" name="email" required>
-                </div>                
-                
-                <div class="input-group">
-                    <label for="password">Senha</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-
-                <h3>Selecione os dados para excluir:</h3>
-
-<div class="checkbox-group">
-  <label class="checkbox-item">
-    <input type="checkbox" class="custom-checkbox" name="delete[]" value="username">
-    <span>Nome de usuário</span>
-  </label>
-
-  <label class="checkbox-item">
-    <input type="checkbox" class="custom-checkbox" name="delete[]" value="email">
-    <span>Email</span>
-  </label>
-
-  <label class="checkbox-item">
-    <input type="checkbox" class="custom-checkbox" name="delete[]" value="telefone">
-    <span>Telefone</span>
-  </label>
 </div>
-
-                <button type="submit" class="btn btn-primary big" style="width: 100%;">
-                    Deletar conta
-                </button>
-                <button type="button" class="btn" style="width: 100%;" 
-                    onclick="window.location.href='index_cadastrado.html'">
-                    Cancelar
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        function goLogin() {
-            window.location.href = "login.html";
+<script>
+    function validarExclusao() {
+        return confirm("Tem certeza absoluta? Esta ação não pode ser desfeita e você perderá o acesso à plataforma.");
     }
-
-
-        function validarExclusao() {
-            const checkboxes = document.querySelectorAll('input[name="delete[]"]:checked');
-
-            if (checkboxes.length === 0) {
-                alert("Selecione pelo menos um dado para excluir.");
-                return false;
-            }
-
-            return confirm(
-                "ATENÇÃO!\n\n" +
-                "A exclusão de dados essenciais (como email, nome de usuário ou telefone) pode resultar na EXCLUSÃO PERMANENTE da conta.\n\n" +
-                "Isso acontece por conta das políticas da empresa.\n\n" +
-                "Deseja continuar?"
-            );
-        }
-    </script>
+</script>
 </body>
 </html>
