@@ -1,6 +1,6 @@
 <?php
 $host = "localhost";
-$user = "Uberversitarios";
+$user = "root";
 $pass = "Pucpr@1234";
 $db = "sistema_autenticacao";
 
