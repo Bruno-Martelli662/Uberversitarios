@@ -5,8 +5,18 @@ header('Content-Type: application/json; charset=utf-8');
 
 $conn = getAdminDBConnection();
 
-$result = $conn->query("SELECT id, nome_usuario, email FROM usuarios WHERE banido = 0");
+$sql = "
+    SELECT 
+        u.id, 
+        u.nome_usuario, 
+        u.email,
+        CASE WHEN a.id IS NOT NULL THEN 1 ELSE 0 END AS is_admin
+    FROM usuarios u
+    LEFT JOIN user_adm a ON u.email = a.email
+    WHERE u.banido = 0
+";
 
+$result = $conn->query($sql);
 $usuarios = [];
 
 while ($row = $result->fetch_assoc()) {

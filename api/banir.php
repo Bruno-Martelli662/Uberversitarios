@@ -12,6 +12,26 @@ if ($id <= 0) {
     exit;
 }
 
+$check_sql = "
+    SELECT u.email 
+    FROM usuarios u 
+    JOIN user_adm a ON u.email = a.email 
+    WHERE u.id = ?
+";
+$stmt_check = $conn->prepare($check_sql);
+$stmt_check->bind_param("i", $id);
+$stmt_check->execute();
+$result_check = $stmt_check->get_result();
+
+if ($result_check->num_rows > 0) {
+    echo json_encode(["status" => "erro", "message" => "Ação negada: Não é possível banir um administrador."]);
+    $stmt_check->close();
+    $conn->close();
+    exit;
+}
+$stmt_check->close();
+
+// Se não for admin, executa o banimento
 $stmt = $conn->prepare("UPDATE usuarios SET banido = 1 WHERE id = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();

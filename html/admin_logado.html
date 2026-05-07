@@ -51,15 +51,17 @@ async function carregarUsuarios() {
     container.innerHTML = "";
 
     usuarios.forEach(u => {
+        const btnBanir = u.is_admin == 1 
+            ? `<span style="color: var(--text-light); font-size: 14px; font-weight: 600;">Administrador</span>` 
+            : `<button class="btn btn-outline small" onclick="banir(${u.id})">Banir</button>`;
+
         container.innerHTML += `
             <div class="card">
                 <h4>${u.nome_usuario}</h4>
                 <p>${u.email}</p>
 
                 <div class="card-actions">
-                    <button class="btn btn-outline small" onclick="banir(${u.id})">
-                        Banir
-                    </button>
+                    ${btnBanir}
                 </div>
             </div>
         `;
@@ -98,11 +100,17 @@ async function carregarViagens() {
 async function banir(id) {
     if (!confirm("Banir usuário?")) return;
 
-    await fetch(`api/banir.php?id=${id}`);
-    alert("Usuário banido!");
+    // Aguardamos e lemos o JSON de resposta
+    const res = await fetch(`../api/banir.php?id=${id}`);
+    const data = await res.json();
 
-    carregarUsuarios();
-    carregarViagens();
+    if (data.status === "erro") {
+        alert(data.message); // Exibe o erro se o back-end barrar (ex: tentativa de banir admin)
+    } else {
+        alert("Usuário banido com sucesso!");
+        carregarUsuarios();
+        carregarViagens();
+    }
 }
 
 // ==========================
