@@ -1,12 +1,22 @@
 <?php
-include "db.php";
-require_once __DIR__ . '/../config.php'; // Adicionado para carregar as funções globais
+require_once __DIR__ . '/../config.php';
 
-$id = intval($_GET["id"]);
-$conn->query("DELETE FROM viagens WHERE id = $id");
+header('Content-Type: application/json; charset=utf-8');
 
-// REGISTRO DO LOG AQUI
-registrarLog(null, 'EXCLUSAO', "A viagem com ID $id foi deletada do banco de dados.");
+$conn = getAdminDBConnection();
+
+$id = intval($_GET["id"] ?? 0);
+
+if ($id <= 0) {
+    echo json_encode(["status" => "erro", "message" => "ID inválido"]);
+    exit;
+}
+
+$stmt = $conn->prepare("DELETE FROM viagens WHERE id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$stmt->close();
+$conn->close();
 
 echo json_encode(["status" => "ok"]);
 ?>

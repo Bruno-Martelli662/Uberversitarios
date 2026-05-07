@@ -58,7 +58,7 @@ try {
         throw new Exception('Telefone inválido.');
     }
 
-    $conn = getDBConnection();
+    $conn = getAuthDBConnection();
 
     $stmt = $conn->prepare("SELECT id FROM usuarios WHERE email = ?");
     

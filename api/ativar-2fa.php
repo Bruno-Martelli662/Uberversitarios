@@ -36,7 +36,7 @@ try {
         throw new Exception('Token de autenticação não fornecido');
     }
 
-    $conn = getDBConnection();
+    $conn = getAuthDBConnection();
 
     $stmt = $conn->prepare("
         SELECT usuario_id 

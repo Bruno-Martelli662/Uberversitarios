@@ -7,7 +7,7 @@ if (empty($token)) {
     die("Token de confirmação inválido.");
 }
 
-$conn = getDBConnection();
+$conn = getAuthDBConnection();
 
 $stmt = $conn->prepare("SELECT id FROM usuarios WHERE token_confirmacao = ? AND confirmado = FALSE");
 $stmt->bind_param("s", $token);

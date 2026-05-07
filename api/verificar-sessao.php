@@ -11,13 +11,12 @@ try {
     session_start();
 
     $headers = getallheaders();
-    $token = $headers['Authorization'] ?? $_GET['token'] ?? '';
-
+    $token = $_COOKIE['authToken'] ?? $headers['Authorization'] ?? $_GET['token'] ?? '';
     if (empty($token)) {
         throw new Exception('Token não fornecido');
     }
 
-    $conn = getDBConnection();
+    $conn = getAuthDBConnection();
 
     $stmt = $conn->prepare("
         SELECT usuario_id 

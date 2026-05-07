@@ -1,56 +1,67 @@
 <?php
-$host = "localhost";
-$user = "Uberversitarios";
-$pass = "Pucpr@1234";
-$db = "sistema_autenticacao";
+require_once __DIR__ . '/../config.php';
 
-$conn = new mysqli($host, $user, $pass, $db);
-
-if ($conn->connect_error) {
-    die("Erro de conexão: " . $conn->connect_error);
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    die("Método não permitido.");
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+$email = trim($_POST['email'] ?? '');
+$senha = trim($_POST['password'] ?? '');
 
-    $email = trim($_POST['email']);
-    $senha = trim($_POST['password']);
+if ($email === '' || $senha === '') {
+    die("E-mail e senha são obrigatórios.");
+}
 
-    $sql = "SELECT id, nome_usuario, senha_hash FROM usuarios WHERE LOWER(email) = LOWER(?)";
-    $stmt = $conn->prepare($sql);
+$conn = getAuthDBConnection();
 
-    if (!$stmt) {
-        die("Erro na query: " . $conn->error);
-    }
+$stmt = $conn->prepare("
+    SELECT id, nome_usuario, senha_hash 
+    FROM usuarios 
+    WHERE LOWER(email) = LOWER(?)
+");
 
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+if (!$stmt) {
+    die("Erro na query.");
+}
 
-    if ($result->num_rows > 0) {
+$stmt->bind_param("s", $email);
+$stmt->execute();
 
-        $user = $result->fetch_assoc();
+$result = $stmt->get_result();
 
-        if (hash('sha256', $senha) === $user['senha_hash']) {
+if ($result->num_rows === 0) {
+    die("Usuário não encontrado.");
+}
 
-            $delete = $conn->prepare("DELETE FROM usuarios WHERE id = ?");
-            $delete->bind_param("i", $user['id']);
+$user = $result->fetch_assoc();
+$stmt->close();
 
-            if ($delete->execute()) {
-                echo "<h2>Conta deletada com sucesso!</h2>";
-                echo "<p>Redirecionando para a página inicial...</p>";
-                header("refresh:2;url=../html/index.html");
-                exit();
-            } else {
-                echo "Erro ao deletar.";
-            }
-            $delete->close();
-        } else {
-            echo "Senha incorreta.";
-        }
-    } else {
-        echo "Usuário não encontrado.";
-    }
+if (hash('sha256', $senha) !== $user['senha_hash']) {
+    $conn->close();
+    die("Senha incorreta.");
+}
+
+$stmt = $conn->prepare("DELETE FROM usuarios WHERE id = ?");
+
+if (!$stmt) {
+    $conn->close();
+    die("Erro ao preparar exclusão.");
+}
+
+$stmt->bind_param("i", $user['id']);
+
+if ($stmt->execute()) {
     $stmt->close();
+    $conn->close();
+
+    echo "<h2>Conta deletada com sucesso!</h2>";
+    echo "<p>Redirecionando para a página inicial...</p>";
+    header("refresh:2;url=../html/index.html");
+    exit();
 }
+
+$stmt->close();
 $conn->close();
+
+echo "Erro ao deletar conta.";
 ?>

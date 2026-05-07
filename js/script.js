@@ -62,6 +62,7 @@ async function sendJsonRequest(url, data = {}, useAuth = false) {
 
     const response = await fetch(url, {
         method: 'POST',
+        credentials: 'same-origin',
         headers,
         body: JSON.stringify(data)
     });
@@ -203,7 +204,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async function 
 
         if (response.success) {
             if (response.token) {
-                localStorage.setItem('authToken', response.token);
+                localStorage.setItem('authToken', response.token);                 
             }
 
             if (response.requires2FASetup) {
@@ -231,8 +232,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async function 
     } finally {
         resetButton?.();
     }
-});
-
+})
 // ==================== RECUPERAÇÃO DE SENHA ====================
 
 document.getElementById('recoverForm')?.addEventListener('submit', async function (e) {
