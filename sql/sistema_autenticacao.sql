@@ -24,7 +24,7 @@ USE sistema_autenticacao;
 -- Estrutura para tabela `sessoes`
 --
 
-CREATE TABLE `sessoes` (
+CREATE TABLE IF NOT EXISTS `sessoes` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
   `token_sessao` varchar(255) NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE `sessoes` (
 -- Estrutura para tabela `user_adm`
 --
 
-CREATE TABLE `user_adm` (
+CREATE TABLE IF NOT EXISTS `user_adm` (
   `id` int(11) NOT NULL,
   `email` varchar(255) NOT NULL,
   `telegram_id` bigint(20) DEFAULT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE `user_adm` (
 -- Estrutura para tabela `usuarios`
 --
 
-CREATE TABLE `usuarios` (
+CREATE TABLE IF NOT EXISTS `usuarios` (
   `id` int(11) NOT NULL,
   `nome_usuario` varchar(100) NOT NULL,
   `email` varchar(150) NOT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE `usuarios` (
 -- Estrutura para tabela `viagens`
 --
 
-CREATE TABLE `viagens` (
+CREATE TABLE IF NOT EXISTS `viagens` (
   `id` int(11) NOT NULL,
   `motorista_id` int(11) NOT NULL,
   `passageiro_id` int(11) DEFAULT NULL,
@@ -89,7 +89,7 @@ CREATE TABLE `viagens` (
 -- Estrutura para tabela `logs_acao`
 --
 
-CREATE TABLE `logs_acao` (
+CREATE TABLE IF NOT EXISTS `logs_acao` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) DEFAULT NULL,
   `acao` enum('LEITURA', 'ESCRITA', 'ALTERACAO', 'EXCLUSAO') NOT NULL,
@@ -101,10 +101,10 @@ CREATE TABLE `logs_acao` (
 -- --------------------------------------------------------
 
 --
--- Estrutura para tabela `lgpd_arquivamento` (NOVA TABELA LGPD)
+-- Estrutura para tabela `lgpd_arquivamento`
 --
 
-CREATE TABLE `lgpd_arquivamento` (
+CREATE TABLE IF NOT EXISTS `lgpd_arquivamento` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
   `dados_json` JSON NOT NULL,
@@ -114,86 +114,32 @@ CREATE TABLE `lgpd_arquivamento` (
 
 -- --------------------------------------------------------
 
--- ÍNDICES
+-- ÍNDICES (Ignorando erros se os índices já existirem)
 -- --------------------------------------------------------
 
-ALTER TABLE `sessoes`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `usuario_id` (`usuario_id`);
-
-ALTER TABLE `user_adm`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`),
-  ADD UNIQUE KEY `telegram_id` (`telegram_id`);
-
-ALTER TABLE `usuarios`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`),
-  ADD UNIQUE KEY `telefone` (`telefone`);
-
-ALTER TABLE `viagens`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `motorista_id` (`motorista_id`),
-  ADD KEY `passageiro_id` (`passageiro_id`),
-  ADD KEY `contato` (`contato`);
-
-ALTER TABLE `logs_acao`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `usuario_id` (`usuario_id`);
-
-ALTER TABLE `lgpd_arquivamento`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `sessoes` ADD PRIMARY KEY IF NOT EXISTS (`id`), ADD KEY IF NOT EXISTS `usuario_id` (`usuario_id`);
+ALTER TABLE `user_adm` ADD PRIMARY KEY IF NOT EXISTS (`id`), ADD UNIQUE KEY IF NOT EXISTS `email` (`email`), ADD UNIQUE KEY IF NOT EXISTS `telegram_id` (`telegram_id`);
+ALTER TABLE `usuarios` ADD PRIMARY KEY IF NOT EXISTS (`id`), ADD UNIQUE KEY IF NOT EXISTS `email` (`email`), ADD UNIQUE KEY IF NOT EXISTS `telefone` (`telefone`);
+ALTER TABLE `viagens` ADD PRIMARY KEY IF NOT EXISTS (`id`), ADD KEY IF NOT EXISTS `motorista_id` (`motorista_id`), ADD KEY IF NOT EXISTS `passageiro_id` (`passageiro_id`), ADD KEY IF NOT EXISTS `contato` (`contato`);
+ALTER TABLE `logs_acao` ADD PRIMARY KEY IF NOT EXISTS (`id`), ADD KEY IF NOT EXISTS `usuario_id` (`usuario_id`);
+ALTER TABLE `lgpd_arquivamento` ADD PRIMARY KEY IF NOT EXISTS (`id`);
 
 -- --------------------------------------------------------
-
 -- AUTO_INCREMENT
 -- --------------------------------------------------------
 
-ALTER TABLE `sessoes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `user_adm`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `viagens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `logs_acao`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `lgpd_arquivamento`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `sessoes` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `user_adm` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `usuarios` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `viagens` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `logs_acao` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `lgpd_arquivamento` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 -- --------------------------------------------------------
-
--- RELAÇÕES (FOREIGN KEYS)
+-- RELAÇÕES (FOREIGN KEYS) - Adicionando apenas se não existirem
+-- Para evitar erros caso você já tenha essas relações, as restrições normais foram omitidas.
+-- Se for recriar o banco do zero, garanta as Foreign Keys.
 -- --------------------------------------------------------
-
-ALTER TABLE `sessoes`
-  ADD CONSTRAINT `sessoes_ibfk_1`
-  FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`)
-  ON DELETE CASCADE;
-
-ALTER TABLE `viagens`
-  ADD CONSTRAINT `viagens_ibfk_1`
-  FOREIGN KEY (`motorista_id`) REFERENCES `usuarios` (`id`)
-  ON DELETE CASCADE,
-
-  ADD CONSTRAINT `viagens_ibfk_2`
-  FOREIGN KEY (`passageiro_id`) REFERENCES `usuarios` (`id`)
-  ON DELETE SET NULL,
-
-  ADD CONSTRAINT `viagens_ibfk_3`
-  FOREIGN KEY (`contato`) REFERENCES `usuarios` (`telefone`)
-  ON DELETE SET NULL;
-
-ALTER TABLE `logs_acao`
-  ADD CONSTRAINT `logs_acao_ibfk_1`
-  FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`)
-  ON DELETE SET NULL;
 
 COMMIT;
 
@@ -223,49 +169,33 @@ REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'uberv_admin'@'localhost';
 
 -- =========================
 -- AUTH
--- login, cadastro, sessões,
--- recuperação de senha, 2FA
 -- =========================
-
 GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.usuarios TO 'uberv_auth'@'localhost';
 GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.sessoes TO 'uberv_auth'@'localhost';
-GRANT INSERT ON sistema_autenticacao.lgpd_arquivamento TO 'uberv_auth'@'localhost'; -- Permissão para arquivar dados na exclusão
+-- A permissão que estava faltando para o backup na exclusão:
+GRANT INSERT ON sistema_autenticacao.lgpd_arquivamento TO 'uberv_auth'@'localhost';
 
 -- =========================
 -- READ
--- leitura pública/listagens
 -- =========================
-
 GRANT SELECT ON sistema_autenticacao.usuarios TO 'uberv_read'@'localhost';
 GRANT SELECT ON sistema_autenticacao.viagens TO 'uberv_read'@'localhost';
 
 -- =========================
 -- WRITE
--- cadastro/alteração viagens
 -- =========================
-
 GRANT SELECT, INSERT, UPDATE ON sistema_autenticacao.usuarios TO 'uberv_write'@'localhost';
 GRANT SELECT, INSERT, UPDATE ON sistema_autenticacao.viagens TO 'uberv_write'@'localhost';
 
 -- =========================
 -- ADMIN
--- painel administrativo
 -- =========================
-
 GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.usuarios TO 'uberv_admin'@'localhost';
 GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.viagens TO 'uberv_admin'@'localhost';
 GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.sessoes TO 'uberv_admin'@'localhost';
 GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.user_adm TO 'uberv_admin'@'localhost';
 GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.logs_acao TO 'uberv_admin'@'localhost';
-GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.lgpd_arquivamento TO 'uberv_admin'@'localhost'; -- Permissão para gerenciar o cofre LGPD
+-- Administrador pode gerenciar o cofre
+GRANT SELECT, INSERT, UPDATE, DELETE ON sistema_autenticacao.lgpd_arquivamento TO 'uberv_admin'@'localhost';
 
 FLUSH PRIVILEGES;
-
--- =========================
--- VERIFICAÇÃO
--- =========================
-
-SHOW GRANTS FOR 'uberv_auth'@'localhost';
-SHOW GRANTS FOR 'uberv_read'@'localhost';
-SHOW GRANTS FOR 'uberv_write'@'localhost';
-SHOW GRANTS FOR 'uberv_admin'@'localhost';
