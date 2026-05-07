@@ -1,83 +1,111 @@
 <?php
-header('Content-Type: application/json');
+require_once __DIR__ . '/../config.php';
 
-$host = 'localhost';
-$dbname = 'sistema_autenticacao';
-$username = 'root';
-$password = '';
+header('Content-Type: application/json; charset=utf-8');
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'Erro de conexão: ' . $e->getMessage()]);
-    exit;
-}
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['success' => false, 'message' => 'Método não permitido']);
-    exit;
-}
-
-$nome = $_POST['Nome'] ?? '';
-$veiculo = $_POST['Veiculo'] ?? '';
-$placa = $_POST['Placa'] ?? '';
-$contato = $_POST['Contato'] ?? '';
-$inicial = $_POST['Inicial'] ?? '';
-$final = $_POST['Final'] ?? '';
-
-if (empty($nome) || empty($veiculo) || empty($placa) || empty($contato) || empty($inicial) || empty($final)) {
-    echo json_encode(['success' => false, 'message' => 'Todos os campos são obrigatórios']);
-    exit;
-}
-
-$contato = preg_replace('/[^0-9]/', '', $contato);
-if (strlen($contato) < 10 || strlen($contato) > 11) {
-    echo json_encode(['success' => false, 'message' => 'Telefone inválido']);
-    exit;
-}
+$conn = null;
 
 try {
-    $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE telefone = :telefone");
-    $stmt->execute([':telefone' => $contato]);
-    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if ($usuario) {
-        $motorista_id = $usuario['id'];
-    } else {
-        $senha_temp = bin2hex(random_bytes(8));
-        $senha_hash = password_hash($senha_temp, PASSWORD_DEFAULT);
-        
-        $stmt = $pdo->prepare("INSERT INTO usuarios (nome_usuario, email, telefone, senha_hash, confirmado) 
-                               VALUES (:nome, :email, :telefone, :senha, 1)");
-        
-        $email_temp = $contato . '@uberversitarios.com';
-        
-        $stmt->execute([
-            ':nome' => $nome,
-            ':email' => $email_temp,
-            ':telefone' => $contato,
-            ':senha' => $senha_hash
-        ]);
-        
-        $motorista_id = $pdo->lastInsertId();
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new Exception('Método não permitido.');
     }
-    
-    $sql = "INSERT INTO viagens (motorista_id, veiculo, contato, origem, destino) 
-            VALUES (:motorista_id, :veiculo, :contato, :origem, :destino)";
-    
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':motorista_id' => $motorista_id,
-        ':veiculo' => $veiculo . ' - ' . $placa,
-        ':contato' => $contato,
-        ':origem' => $inicial,
-        ':destino' => $final
-    ]);
-    
-    echo json_encode(['success' => true, 'message' => 'Viagem cadastrada com sucesso!']);
-    
-} catch(PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'Erro ao cadastrar viagem: ' . $e->getMessage()]);
+
+    $nome = trim($_POST['Nome'] ?? '');
+    $veiculo = trim($_POST['Veiculo'] ?? '');
+    $placa = trim($_POST['Placa'] ?? '');
+    $contato = trim($_POST['Contato'] ?? '');
+    $inicial = trim($_POST['Inicial'] ?? '');
+    $final = trim($_POST['Final'] ?? '');
+
+    if ($nome === '' || $veiculo === '' || $placa === '' || $contato === '' || $inicial === '' || $final === '') {
+        throw new Exception('Todos os campos são obrigatórios.');
+    }
+
+    $contato = preg_replace('/[^0-9]/', '', $contato);
+
+    if (strlen($contato) < 10 || strlen($contato) > 11) {
+        throw new Exception('Telefone inválido.');
+    }
+
+    $conn = getWriteDBConnection();
+
+    $stmt = $conn->prepare("SELECT id FROM usuarios WHERE telefone = ?");
+
+    if (!$stmt) {
+        throw new Exception('Erro ao preparar consulta de usuário.');
+    }
+
+    $stmt->bind_param("s", $contato);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+    $usuario = $result->fetch_assoc();
+
+    $stmt->close();
+
+    if ($usuario) {
+        $motoristaId = $usuario['id'];
+    } else {
+        $senhaTemp = bin2hex(random_bytes(8));
+        $senhaHash = hash('sha256', $senhaTemp);
+        $emailTemp = $contato . '@uberversitarios.com';
+
+        $stmt = $conn->prepare("
+            INSERT INTO usuarios 
+            (nome_usuario, email, telefone, senha_hash, confirmado)
+            VALUES (?, ?, ?, ?, 1)
+        ");
+
+        if (!$stmt) {
+            throw new Exception('Erro ao preparar cadastro de usuário temporário.');
+        }
+
+        $stmt->bind_param("ssss", $nome, $emailTemp, $contato, $senhaHash);
+
+        if (!$stmt->execute()) {
+            throw new Exception('Erro ao cadastrar usuário temporário.');
+        }
+
+        $motoristaId = $conn->insert_id;
+        $stmt->close();
+    }
+
+    $veiculoCompleto = $veiculo . ' - ' . $placa;
+
+    $stmt = $conn->prepare("
+        INSERT INTO viagens 
+        (motorista_id, veiculo, contato, origem, destino)
+        VALUES (?, ?, ?, ?, ?)
+    ");
+
+    if (!$stmt) {
+        throw new Exception('Erro ao preparar cadastro da viagem.');
+    }
+
+    $stmt->bind_param("issss", $motoristaId, $veiculoCompleto, $contato, $inicial, $final);
+
+    if (!$stmt->execute()) {
+        throw new Exception('Erro ao cadastrar viagem.');
+    }
+
+    $stmt->close();
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Viagem cadastrada com sucesso!'
+    ], JSON_UNESCAPED_UNICODE);
+
+} catch (Exception $e) {
+    error_log("Erro processar_cadastro_viagem.php: " . $e->getMessage());
+
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ], JSON_UNESCAPED_UNICODE);
+
+} finally {
+    if ($conn) {
+        $conn->close();
+    }
 }
 ?>

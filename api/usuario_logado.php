@@ -9,7 +9,7 @@ if (!$token) {
     exit;
 }
 
-$conn = getDBConnection();
+$conn = getAuthDBConnection();
 $stmt = $conn->prepare("
     SELECT u.nome_usuario, u.telefone
     FROM sessoes s

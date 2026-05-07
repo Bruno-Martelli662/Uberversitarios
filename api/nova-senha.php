@@ -38,7 +38,7 @@ try {
         throw new Exception('Nova senha é obrigatória.');
     }
 
-    $conn = getDBConnection();
+    $conn = getAuthDBConnection();
 
     $stmt = $conn->prepare("
         SELECT id 

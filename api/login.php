@@ -30,7 +30,7 @@ try {
         throw new Exception('E-mail e senha são obrigatórios.');
     }
 
-    $conn = getDBConnection();
+    $conn = getAuthDBConnection();
 
     $stmt = $conn->prepare("
         SELECT id, nome_usuario, senha_hash, confirmado, google_2fa_secret, google_2fa_ativado
@@ -64,6 +64,14 @@ try {
 
     $tokenSessao = gerarToken();
     $expiracao = date('Y-m-d H:i:s', strtotime('+1 day'));
+    
+    setcookie('authToken', $tokenSessao, [
+        'expires' => time() + 43200,
+        'path' => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+        'secure' => false
+    ]);
 
     $stmt = $conn->prepare("
         INSERT INTO sessoes (usuario_id, token_sessao, data_expiracao)

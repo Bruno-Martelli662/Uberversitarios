@@ -1,5 +1,9 @@
 <?php
-include "db.php";
+require_once __DIR__ . '/../config.php';
+
+header('Content-Type: application/json; charset=utf-8');
+
+$conn = getAdminDBConnection();
 
 $sql = "
 SELECT v.*, u.nome_usuario AS motorista_nome
@@ -15,5 +19,7 @@ while ($row = $result->fetch_assoc()) {
     $viagens[] = $row;
 }
 
-echo json_encode($viagens);
+$conn->close();
+
+echo json_encode($viagens, JSON_UNESCAPED_UNICODE);
 ?>
