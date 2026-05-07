@@ -5,6 +5,22 @@
   <title>Privacidade e Dados</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .dados-box {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: left;
+      font-size: 14px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
   <script src="../js/script2.js"></script>
@@ -18,77 +34,101 @@
   <section class="section">
     <h1 class="title">Privacidade e Controle de Dados</h1>
     <p class="subtitle">
-      De acordo com a LGPD, você pode solicitar a exclusão total ou parcial dos seus dados a qualquer momento.
+      De acordo com a LGPD, você tem o direito de visualizar todos os dados que temos sobre você antes de solicitar a exclusão.
     </p>
   </section>
 
   <section class="container">
-    <div class="form-container">
-      <h2>Excluir dados específicos</h2>
-      <p style="margin-bottom:15px; color:#777;">
-        Selecione quais informações deseja remover do sistema:
-      </p>
-      <div class="input-group">
-        <label><input type="checkbox" value="telefone"> Telefone</label><br>
-        <label><input type="checkbox" value="endereco"> Endereço</label><br>
-        <label><input type="checkbox" value="historico"> Histórico de viagens</label><br>
-        <label><input type="checkbox" value="pagamentos"> Dados de pagamento</label>
-      </div>
-      <button class="btn btn-primary" onclick="deletePartial()">
-        Excluir selecionados
-      </button>
-    </div>
+    <div class="form-container" style="max-width: 600px;">
+      <h2>Seus Dados no Sistema</h2>
+      <p style="color:#777; margin-bottom: 10px;">Abaixo estão as informações vinculadas à sua conta:</p>
+      
+      <div id="dados-view" class="dados-box">Carregando seus dados...</div>
 
-    <div class="form-container" style="margin-top:40px;">
+      <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
       <h2 style="color:#ff5a5f;">Excluir conta completamente</h2>
       <p style="margin-bottom:15px; color:#777;">
-        Esta ação removerá permanentemente sua conta e todos os dados associados.
-        Esta operação não pode ser desfeita.
+        Esta ação removerá permanentemente sua conta da base ativa. Por exigência legal (auditoria e proteção), uma cópia criptografada/arquivada será mantida isolada pelo tempo previsto em lei.
       </p>
+      
       <div class="input-group">
         <input type="checkbox" id="confirmDelete">
-        <label for="confirmDelete">
-          Confirmo que desejo excluir minha conta permanentemente
+        <label for="confirmDelete" style="font-size: 14px; font-weight: 600;">
+          Confirmo que desejo excluir minha conta
         </label>
       </div>
-      <button class="btn btn-primary" onclick="deleteAccount()">
-        Excluir conta
+      <button class="btn btn-primary" onclick="deleteAccount()" style="width: 100%;">
+        Excluir minha conta
       </button>
     </div>
   </section>
 
   <footer>
-    <p>Contato: contato@site.com</p>
+    <p>Contato: uberversitarios@gmail.com</p>
     <p>Direitos garantidos pela LGPD</p>
   </footer>
 
   <script>
     function goHome() {
-      window.location.href = "index.html";
+      window.location.href = "index_cadastrado.html";
     }
 
-    function deletePartial() {
-      const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-      let selected = [];
-      checkboxes.forEach(cb => {
-        if (cb.value) selected.push(cb.value);
-      });
-      if (selected.length === 0) {
-        alert("Selecione ao menos um dado para excluir.");
-        return;
-      }
-      console.log("Excluir parcialmente:", selected);
-      alert("Solicitação de exclusão parcial enviada!");
-    }
+    // Carrega os dados assim que a página abre
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('authToken');
+      const box = document.getElementById('dados-view');
+      
+      if (!token) return;
 
-    function deleteAccount() {
-      const confirm = document.getElementById("confirmDelete").checked;
-      if (!confirm) {
-        alert("Você precisa confirmar a exclusão total.");
+      try {
+        const response = await fetch(`../api/meus_dados.php?token=${encodeURIComponent(token)}`);
+        const result = await response.json();
+
+        if (result.success) {
+          // Formata o JSON para ficar legível para o usuário
+          box.textContent = JSON.stringify(result.dados, null, 4);
+        } else {
+          box.textContent = "Erro ao carregar os dados: " + result.message;
+        }
+      } catch (error) {
+        box.textContent = "Erro de conexão ao buscar os dados.";
+      }
+    });
+
+    async function deleteAccount() {
+      const confirmChecked = document.getElementById("confirmDelete").checked;
+      
+      if (!confirmChecked) {
+        alert("Você precisa marcar a caixa confirmando a exclusão.");
         return;
       }
-      console.log("Excluir conta completamente");
-      alert("Conta excluída com sucesso!");
+
+      if(!confirm("Atenção: Esta ação é irreversível. Deseja mesmo excluir sua conta?")) {
+        return;
+      }
+
+      const token = localStorage.getItem('authToken');
+      
+      try {
+        const response = await fetch('../api/excluir_conta_lgpd.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: token })
+        });
+        
+        const result = await response.json();
+
+        if (result.success) {
+            alert("Conta excluída com sucesso!");
+            localStorage.removeItem('authToken');
+            window.location.href = "index.html";
+        } else {
+            alert("Erro: " + result.message);
+        }
+      } catch (error) {
+        alert("Erro ao tentar excluir a conta. Tente novamente mais tarde.");
+      }
     }
   </script>
 </body>
