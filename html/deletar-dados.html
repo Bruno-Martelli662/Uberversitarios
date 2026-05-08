@@ -35,6 +35,10 @@
         
         <div id="dados-view" class="dados-box">Carregando seus dados...</div>
 
+        <button type="button" id="btnBaixarDados" class="btn btn-outline" style="width: 100%; margin-bottom: 25px; display: none;" onclick="baixarDados()">
+            📥 Baixar meus dados (JSON)
+        </button>
+
         <form id="formDeletar">
             <p style="text-align: center; color: #333; margin-bottom: 15px; font-weight: 600;">
                 Para confirmar a exclusão, digite suas credenciais:
@@ -65,6 +69,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
         const token = localStorage.getItem('authToken');
         const box = document.getElementById('dados-view');
+        const btnBaixar = document.getElementById('btnBaixarDados');
         
         if (!token) {
             box.textContent = "Sessão não encontrada. Faça login novamente para visualizar seus dados.";
@@ -72,13 +77,15 @@
         }
 
         try {
-            // Chama a API que construímos antes para ler os dados do usuário e viagens
+            // Chama a API para ler os dados do usuário e viagens
             const response = await fetch(`../api/meus_dados.php?token=${encodeURIComponent(token)}`);
             const result = await response.json();
 
             if (result.success) {
                 // Formata o JSON com recuo (4 espaços) para ficar legível
                 box.textContent = JSON.stringify(result.dados, null, 4);
+                // Exibe o botão de download agora que os dados foram carregados
+                btnBaixar.style.display = 'block';
             } else {
                 box.textContent = "Erro ao carregar os dados: " + result.message;
             }
@@ -87,11 +94,37 @@
         }
     });
 
-    // 2. LIDA COM O BOTÃO DE EXCLUIR
+    // 2. NOVA FUNÇÃO DE PORTABILIDADE (DOWNLOAD)
+    function baixarDados() {
+        const box = document.getElementById('dados-view');
+        const conteudo = box.textContent;
+
+        // Cria um objeto "Blob" (um arquivo em memória) com o conteúdo do JSON
+        const blob = new Blob([conteudo], { type: 'application/json' });
+        
+        // Cria um link temporário para forçar o download do arquivo
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "meus_dados_uberversitarios.json"; // Nome do arquivo
+        document.body.appendChild(a);
+        a.click(); // Simula o clique do usuário
+        document.body.removeChild(a); // Remove o link da tela
+        window.URL.revokeObjectURL(url); // Libera a memória
+    }
+
+    // 3. LIDA COM O BOTÃO DE EXCLUIR
     document.getElementById('formDeletar').addEventListener('submit', async function(e) {
         e.preventDefault(); 
         
-        if (!confirm("Tem certeza absoluta? Esta ação não pode ser desfeita e você perderá o acesso à plataforma.")) {
+        // Mensagem de confirmação atualizada com a justificativa de negócio/LGPD
+        const mensagemConfirmacao = 
+            "Tem certeza absoluta?\n\n" +
+            "Devido à natureza da nossa plataforma de caronas universitárias, que exige identificação e rastreabilidade para garantir a segurança de todos os estudantes, estamos impossibilitados de realizar a exclusão apenas parcial dos seus dados para que você continue usando o site.\n\n" +
+            "Ao prosseguir, sua conta será totalmente desativada, você perderá o acesso e as funções operacionais cessarão. Esta ação é irreversível.\n\n" +
+            "Deseja confirmar a exclusão?";
+
+        if (!confirm(mensagemConfirmacao)) {
             return;
         }
 
