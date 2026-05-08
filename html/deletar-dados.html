@@ -65,7 +65,6 @@
 </div>
 
 <script>
-    // 1. CARREGA OS DADOS ASSIM QUE A PÁGINA ABRE
     document.addEventListener('DOMContentLoaded', async () => {
         const token = localStorage.getItem('authToken');
         const box = document.getElementById('dados-view');
@@ -77,14 +76,11 @@
         }
 
         try {
-            // Chama a API para ler os dados do usuário e viagens
             const response = await fetch(`../api/meus_dados.php?token=${encodeURIComponent(token)}`);
             const result = await response.json();
 
             if (result.success) {
-                // Formata o JSON com recuo (4 espaços) para ficar legível
                 box.textContent = JSON.stringify(result.dados, null, 4);
-                // Exibe o botão de download agora que os dados foram carregados
                 btnBaixar.style.display = 'block';
             } else {
                 box.textContent = "Erro ao carregar os dados: " + result.message;
@@ -94,30 +90,26 @@
         }
     });
 
-    // 2. NOVA FUNÇÃO DE PORTABILIDADE (DOWNLOAD)
     function baixarDados() {
         const box = document.getElementById('dados-view');
         const conteudo = box.textContent;
 
-        // Cria um objeto "Blob" (um arquivo em memória) com o conteúdo do JSON
-        const blob = new Blob([conteudo], { type: 'application/json' });
+       const blob = new Blob([conteudo], { type: 'application/json' });
         
-        // Cria um link temporário para forçar o download do arquivo
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = "meus_dados_uberversitarios.json"; // Nome do arquivo
+        a.download = "meus_dados_uberversitarios.json";
         document.body.appendChild(a);
-        a.click(); // Simula o clique do usuário
-        document.body.removeChild(a); // Remove o link da tela
-        window.URL.revokeObjectURL(url); // Libera a memória
+        a.click(); 
+        document.body.removeChild(a); 
+        window.URL.revokeObjectURL(url);
     }
 
-    // 3. LIDA COM O BOTÃO DE EXCLUIR
+    
     document.getElementById('formDeletar').addEventListener('submit', async function(e) {
         e.preventDefault(); 
         
-        // Mensagem de confirmação atualizada com a justificativa de negócio/LGPD
         const mensagemConfirmacao = 
             "Tem certeza absoluta?\n\n" +
             "Devido à natureza da nossa plataforma de caronas universitárias, que exige identificação e rastreabilidade para garantir a segurança de todos os estudantes, estamos impossibilitados de realizar a exclusão apenas parcial dos seus dados para que você continue usando o site.\n\n" +
@@ -147,13 +139,13 @@
 
             if (result.success) {
                 alert(result.message);
-                localStorage.removeItem('authToken'); // Desloga do front
-                window.location.href = 'index.html'; // Volta para a tela principal
+                localStorage.removeItem('authToken'); 
+                window.location.href = 'index.html'; 
             } else {
                 alert("Erro: " + result.message);
             }
         } catch (error) {
-            alert("Erro ao conectar com o servidor. Verifique sua conexão.");
+            alert("Erro ao conectar com o servidor.");
             console.error(error);
         } finally {
             btn.innerHTML = textoOriginal;
