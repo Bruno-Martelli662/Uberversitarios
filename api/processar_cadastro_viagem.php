@@ -23,6 +23,31 @@ try {
 
     $contato = preg_replace('/[^0-9]/', '', $contato);
 
+    if (!preg_match('/^[A-Za-zÀ-ÿ\s]{2,100}$/u', $nome)) {
+        throw new Exception('Nome inválido.');
+    }
+
+    // Regex de validação — veículo
+    if (!preg_match('/^[A-Za-z0-9À-ÿ\s\-]{2,100}$/u', $veiculo)) {
+        throw new Exception('Veículo inválido.');
+    }
+
+    // Regex de validação — placa Mercosul/Brasil
+    $placaLimpa = strtoupper(str_replace('-', '', $placa));
+
+    if (!preg_match('/^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/', $placaLimpa)) {
+        throw new Exception('Placa inválida.');
+    }
+
+    // Validação tamanho origem/destino
+    if (strlen($inicial) < 2 || strlen($inicial) > 150) {
+        throw new Exception('Origem inválida.');
+    }
+
+    if (strlen($final) < 2 || strlen($final) > 150) {
+        throw new Exception('Destino inválido.');
+    }
+
     if (strlen($contato) < 10 || strlen($contato) > 11) {
         throw new Exception('Telefone inválido.');
     }

@@ -25,6 +25,15 @@ try {
     $codigo = trim($data['codigo'] ?? '');
     $secret = trim($data['secret'] ?? '');
 
+    if (!preg_match('/^\d{6}$/', $codigo)) {
+        throw new Exception('Código 2FA inválido.');
+    }
+    
+    // Regex de validação — secret Base32
+    if (!preg_match('/^[A-Z2-7]{16,32}$/', $secret)) {
+        throw new Exception('Secret 2FA inválido.');
+    }
+
     if ($codigo === '' || $secret === '') {
         throw new Exception('Dados inválidos para ativação do 2FA');
     }

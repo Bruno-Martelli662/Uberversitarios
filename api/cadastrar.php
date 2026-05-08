@@ -53,6 +53,14 @@ try {
     }
 
     $telefone = preg_replace('/[^0-9]/', '', $telefone);
+    if (!preg_match('/^[A-Za-zÀ-ÿ\s]{2,100}$/u', $nome)) {
+        throw new Exception('Nome inválido.');
+    }
+
+    // Regex de validação — hash SHA-256
+    if (!preg_match('/^[a-f0-9]{64}$/', $senhaHash)) {
+        throw new Exception('Hash de senha inválido.');
+    }
 
     if (strlen($telefone) < 10 || strlen($telefone) > 11) {
         throw new Exception('Telefone inválido.');
