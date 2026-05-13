@@ -332,4 +332,29 @@ GRANT SELECT, INSERT, UPDATE, DELETE
 ON sistema_autenticacao.lgpd_arquivamento
 TO 'uberv_admin'@'localhost';
 
+-- =========================
+-- ADMIN PASSWORDLESS
+-- E-MAIL + TELEGRAM
+-- =========================
+
+USE sistema_autenticacao;
+
+ALTER TABLE user_adm
+  ADD COLUMN IF NOT EXISTS criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN IF NOT EXISTS email_login_token VARCHAR(255) DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS email_login_expira DATETIME DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS email_login_confirmado TINYINT(1) DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS codigo_login_hash VARCHAR(255) DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS codigo_login_expira DATETIME DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS admin_sessao_token VARCHAR(255) DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS admin_sessao_expira DATETIME DEFAULT NULL;
+
+-- Índices úteis para login admin
+CREATE INDEX IF NOT EXISTS idx_user_adm_email_login_token
+ON user_adm (email_login_token);
+
+CREATE INDEX IF NOT EXISTS idx_user_adm_admin_sessao_token
+ON user_adm (admin_sessao_token);
+
+
 FLUSH PRIVILEGES;
