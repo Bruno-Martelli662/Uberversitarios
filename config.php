@@ -83,6 +83,10 @@ define('SMTP_FROM_NAME', $config['SMTP_FROM_NAME']);
 define('SMTP_SECURE', $config['SMTP_SECURE']);
 define('SMTP_DEBUG', $config['SMTP_DEBUG']);
 
+define('TELEGRAM_BOT_TOKEN', $config['TELEGRAM_BOT_TOKEN']);
+
+
+
 function criarConexao($usuario, $senha) {
     $conn = new mysqli(DB_HOST, $usuario, $senha, DB_NAME);
 
@@ -220,6 +224,29 @@ function enviarEmail($para, $assunto, $mensagem, $html = true) {
         error_log("Erro ao enviar e-mail para {$para}: " . $mail->ErrorInfo);
         return false;
     }
+}
+
+function enviarTelegram($chatId, $mensagem) {
+    $url = "https://api.telegram.org/bot" . TELEGRAM_BOT_TOKEN . "/sendMessage";
+
+    $dados = [
+        'chat_id' => $chatId,
+        'text' => $mensagem
+    ];
+
+    $opcoes = [
+        'http' => [
+            'method' => 'POST',
+            'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
+            'content' => http_build_query($dados),
+            'timeout' => 10
+        ]
+    ];
+
+    $contexto = stream_context_create($opcoes);
+    $resultado = file_get_contents($url, false, $contexto);
+
+    return $resultado !== false;
 }
 
 function validarEmail($email) {

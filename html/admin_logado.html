@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -17,62 +16,84 @@
     justify-content: center;
 }
 </style>
-
 </head>
 
 <body>
 
+<script>
+fetch('../api/admin-verificar-sessao.php', {
+    credentials: 'same-origin'
+})
+.then(res => res.json())
+.then(data => {
+    if (!data.success || !data.admin) {
+        window.location.href = 'admin-login.html';
+    }
+})
+.catch(() => {
+    window.location.href = 'admin-login.html';
+});
+</script>
+
 <div class="container">
     <h2 class="title">Painel do Administrador</h2>
 
-```
-<div class="section">
-    <h3>Usuários</h3>
-    <div id="usuarios" class="cards"></div>
-</div>
+    <div style="text-align:center; margin-bottom:20px;">
+        <button class="btn btn-outline" onclick="logoutAdmin()">Sair</button>
+    </div>
 
-<div class="section">
-    <h3>Viagens</h3>
-    <div id="viagens" class="cards"></div>
-</div>
-```
+    <div class="section">
+        <h3>Usuários</h3>
+        <div id="usuarios" class="cards"></div>
+    </div>
 
+    <div class="section">
+        <h3>Viagens</h3>
+        <div id="viagens" class="cards"></div>
+    </div>
 </div>
 
 <script>
-// ==========================
-// USUÁRIOS
-// ==========================
+function escapar(texto) {
+    return String(texto ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
 async function carregarUsuarios() {
-    const res = await fetch("../api/usuarios.php");
+    const res = await fetch("../api/usuarios.php", {
+        credentials: 'same-origin'
+    });
+
     const usuarios = await res.json();
 
     const container = document.getElementById("usuarios");
     container.innerHTML = "";
 
     usuarios.forEach(u => {
-        const btnBanir = u.is_admin == 1 
-            ? `<span style="color: var(--text-light); font-size: 14px; font-weight: 600;">Administrador</span>` 
-            : `<button class="btn btn-outline small" onclick="banir(${u.id})">Banir</button>`;
-
         container.innerHTML += `
             <div class="card">
-                <h4>${u.nome_usuario}</h4>
-                <p>${u.email}</p>
+                <h4>${escapar(u.nome_usuario)}</h4>
+                <p>${escapar(u.email)}</p>
 
                 <div class="card-actions">
-                    ${btnBanir}
+                    <button class="btn btn-outline small" onclick="banir(${Number(u.id)})">
+                        Banir
+                    </button>
                 </div>
             </div>
         `;
     });
 }
 
-// ==========================
-// VIAGENS
-// ==========================
 async function carregarViagens() {
-    const res = await fetch("../api/viagens.php");
+    const res = await fetch("../api/viagens.php", {
+        credentials: 'same-origin'
+    });
+
     const viagens = await res.json();
 
     const container = document.getElementById("viagens");
@@ -81,11 +102,11 @@ async function carregarViagens() {
     viagens.forEach(v => {
         container.innerHTML += `
             <div class="card">
-                <h4>${v.origem} → ${v.destino}</h4>
-                <p>Motorista: ${v.motorista_nome}</p>
+                <h4>${escapar(v.origem)} → ${escapar(v.destino)}</h4>
+                <p>Motorista: ${escapar(v.motorista_nome)}</p>
 
                 <div class="card-actions">
-                    <button class="btn btn-outline small" onclick="deletarViagem(${v.id})">
+                    <button class="btn btn-outline small" onclick="deletarViagem(${Number(v.id)})">
                         Apagar
                     </button>
                 </div>
@@ -94,38 +115,49 @@ async function carregarViagens() {
     });
 }
 
-// ==========================
-// BANIR
-// ==========================
 async function banir(id) {
     if (!confirm("Banir usuário?")) return;
 
-    // Aguardamos e lemos o JSON de resposta
-    const res = await fetch(`../api/banir.php?id=${id}`);
+    const res = await fetch(`../api/banir.php?id=${encodeURIComponent(id)}`, {
+        credentials: 'same-origin'
+    });
+
     const data = await res.json();
 
     if (data.status === "erro") {
-        alert(data.message); // Exibe o erro se o back-end barrar (ex: tentativa de banir admin)
+        alert(data.message);
     } else {
-        alert("Usuário banido com sucesso!");
+        alert("Usuário banido!");
         carregarUsuarios();
         carregarViagens();
     }
 }
 
-// ==========================
-// DELETAR VIAGEM
-// ==========================
 async function deletarViagem(id) {
     if (!confirm("Apagar viagem?")) return;
 
-    await fetch(`api/deletar_viagem.php?id=${id}`);
-    alert("Viagem apagada!");
+    const res = await fetch(`../api/deletar_viagem.php?id=${encodeURIComponent(id)}`, {
+        credentials: 'same-origin'
+    });
 
-    carregarViagens();
+    const data = await res.json();
+
+    if (data.status === "erro") {
+        alert(data.message);
+    } else {
+        alert("Viagem apagada!");
+        carregarViagens();
+    }
 }
 
-// INIT
+async function logoutAdmin() {
+    await fetch('../api/admin-logout.php', {
+        credentials: 'same-origin'
+    });
+
+    window.location.href = 'admin-login.html';
+}
+
 carregarUsuarios();
 carregarViagens();
 </script>

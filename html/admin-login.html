@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Admin - Uberversitários</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h2 class="title">Acesso Administrativo</h2>
+
+            <div id="mensagem" style="margin-bottom: 15px; text-align:center;"></div>
+
+            <form id="form-email">
+                <div class="input-group">
+                    <label for="email">E-mail administrativo</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                <button class="btn btn-primary big" type="submit" style="width:100%;">
+                    Enviar confirmação por e-mail
+                </button>
+            </form>
+        </div>
+    </div>
+
+<script>
+const mensagem = document.getElementById('mensagem');
+
+function mostrarMensagem(texto, erro = false) {
+    mensagem.textContent = texto;
+    mensagem.style.color = erro ? 'red' : 'green';
+}
+
+document.getElementById('form-email').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value.trim();
+
+    try {
+        const res = await fetch('../api/admin-solicitar-email.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            mostrarMensagem('Confirmação enviada. Verifique seu e-mail.');
+        } else {
+            mostrarMensagem(data.message || 'Erro ao solicitar acesso.', true);
+        }
+    } catch (error) {
+        mostrarMensagem('Erro ao conectar com o servidor.', true);
+    }
+});
+</script>
+</body>
+</html>
