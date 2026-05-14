@@ -21,12 +21,6 @@ try {
 
     $token = trim($data['token'] ?? '');
 
-    $pergunta1 =
-        trim($data['pergunta1'] ?? '');
-
-    $pergunta2 =
-        trim($data['pergunta2'] ?? '');
-
     $resposta1 =
         trim($data['resposta1'] ?? '');
 
@@ -35,8 +29,6 @@ try {
 
     if (
         !$token ||
-        !$pergunta1 ||
-        !$pergunta2 ||
         !$resposta1 ||
         !$resposta2
     ) {
@@ -61,10 +53,7 @@ try {
         UPDATE user_adm
         SET
 
-        pergunta_seguranca_1 = ?,
         resposta_seguranca_1_hash = ?,
-
-        pergunta_seguranca_2 = ?,
         resposta_seguranca_2_hash = ?,
 
         perguntas_configuradas = 1
@@ -73,12 +62,9 @@ try {
     ");
 
     $stmt->bind_param(
-        "sssss",
+        "sss",
 
-        $pergunta1,
         $hash1,
-
-        $pergunta2,
         $hash2,
 
         $token

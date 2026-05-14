@@ -90,42 +90,18 @@ try {
 
     if (!enviarTelegram($admin['telegram_id'], $mensagem)) {
 
-    $stmt = $conn->prepare("
-        SELECT
-            pergunta_seguranca_1,
-            pergunta_seguranca_2
-        FROM user_adm
-        WHERE id = ?
-    ");
+        echo json_encode([
 
-    $stmt->bind_param("i", $admin['id']);
-    $stmt->execute();
+            'success' => false,
 
-    $resultPerguntas = $stmt->get_result();
+            'fallbackPerguntas' => true,
 
-    $perguntas = $resultPerguntas->fetch_assoc();
+            'message' => 'Telegram indisponível.'
 
-    $stmt->close();
+        ], JSON_UNESCAPED_UNICODE);
 
-    echo json_encode([
-
-        'success' => false,
-
-        'fallbackPerguntas' => true,
-
-        'message' =>
-            'Telegram indisponível.',
-
-        'perguntas' => [
-
-            $perguntas['pergunta_seguranca_1'],
-            $perguntas['pergunta_seguranca_2']
-        ]
-
-    ], JSON_UNESCAPED_UNICODE);
-
-    exit;
-}
+        exit;
+    }
 
     $response = [
         'success' => true,
@@ -133,6 +109,7 @@ try {
     ];
 
 } catch (Exception $e) {
+
     error_log("Erro admin-enviar-telegram.php: " . $e->getMessage());
 
     $response = [
@@ -141,11 +118,13 @@ try {
     ];
 
 } finally {
+
     if ($conn) {
         $conn->close();
     }
 }
 
 echo json_encode($response, JSON_UNESCAPED_UNICODE);
+
 exit;
 ?>

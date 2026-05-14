@@ -87,7 +87,9 @@
 
             <div class="input-group">
 
-                <label id="labelPergunta1"></label>
+                <label>
+                    Qual o seu restaurante favorito?
+                </label>
 
                 <input
                     type="text"
@@ -99,7 +101,9 @@
 
             <div class="input-group">
 
-                <label id="labelPergunta2"></label>
+                <label>
+                    Qual o seu prato favorito nesse restaurante?
+                </label>
 
                 <input
                     type="text"
@@ -236,20 +240,6 @@ btnEnviar.addEventListener(
 
                 formPerguntas.style.display =
                     'block';
-
-                document
-                    .getElementById(
-                        'labelPergunta1'
-                    )
-                    .textContent =
-                        data.perguntas[0];
-
-                document
-                    .getElementById(
-                        'labelPergunta2'
-                    )
-                    .textContent =
-                        data.perguntas[1];
             }
         }
 
@@ -261,16 +251,6 @@ btnEnviar.addEventListener(
     );
 
     formPerguntas.style.display = 'block';
-
-    document.getElementById(
-        'labelPergunta1'
-    ).textContent =
-        'Sua pergunta de segurança 1';
-
-    document.getElementById(
-        'labelPergunta2'
-    ).textContent =
-        'Sua pergunta de segurança 2';
 
     } finally {
 

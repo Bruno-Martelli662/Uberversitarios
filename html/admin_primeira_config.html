@@ -17,17 +17,9 @@
         <form id="form-perguntas">
 
             <div class="input-group">
-                <label>Pergunta 1</label>
-
-                <input
-                    type="text"
-                    id="pergunta1"
-                    required
-                >
-            </div>
-
-            <div class="input-group">
-                <label>Resposta 1</label>
+                <label>
+                    Qual o seu restaurante favorito?
+                </label>
 
                 <input
                     type="text"
@@ -37,17 +29,9 @@
             </div>
 
             <div class="input-group">
-                <label>Pergunta 2</label>
-
-                <input
-                    type="text"
-                    id="pergunta2"
-                    required
-                >
-            </div>
-
-            <div class="input-group">
-                <label>Resposta 2</label>
+                <label>
+                    Qual o seu prato favorito nesse restaurante?
+                </label>
 
                 <input
                     type="text"
@@ -131,24 +115,10 @@ form.addEventListener(
 
                     token,
 
-                    pergunta1:
-                        document
-                            .getElementById(
-                                'pergunta1'
-                            )
-                            .value,
-
                     resposta1:
                         document
                             .getElementById(
                                 'resposta1'
-                            )
-                            .value,
-
-                    pergunta2:
-                        document
-                            .getElementById(
-                                'pergunta2'
                             )
                             .value,
 
