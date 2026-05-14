@@ -16,6 +16,10 @@ $stmt = $conn->prepare("DELETE FROM viagens WHERE id = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $stmt->close();
+
+// REGISTRO DE AUDITORIA (LOG)
+registrarLog(null, 'EXCLUSAO', "Viagem ID {$id} foi apagada pelo administrador.");
+
 $conn->close();
 
 echo json_encode(["status" => "ok"]);

@@ -12,7 +12,6 @@ SET time_zone = "+00:00";
 CREATE DATABASE IF NOT EXISTS sistema_autenticacao
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_general_ci;
-
 USE sistema_autenticacao;
 
 -- =====================================================
@@ -203,12 +202,12 @@ CREATE TABLE IF NOT EXISTS lgpd_arquivamento (
 
     PRIMARY KEY (id),
 
-    KEY idx_lgpd_usuario (usuario_id),
+    -- Mantemos o índice para facilitar buscas de auditoria
+    KEY idx_lgpd_usuario (usuario_id)
 
-    CONSTRAINT fk_lgpd_usuario
-        FOREIGN KEY (usuario_id)
-        REFERENCES usuarios(id)
-        ON DELETE CASCADE
+    -- FIX: CONSTRAINT fk_lgpd_usuario removida.
+    -- Sem o ON DELETE CASCADE, os registros desta tabela
+    -- não serão apagados automaticamente quando um usuário for deletado.
 
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4
@@ -355,6 +354,5 @@ ON user_adm (email_login_token);
 
 CREATE INDEX IF NOT EXISTS idx_user_adm_admin_sessao_token
 ON user_adm (admin_sessao_token);
-
 
 FLUSH PRIVILEGES;

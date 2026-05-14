@@ -34,7 +34,6 @@ try {
 
     // Regex de validação — placa Mercosul/Brasil
     $placaLimpa = strtoupper(str_replace('-', '', $placa));
-
     if (!preg_match('/^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/', $placaLimpa)) {
         throw new Exception('Placa inválida.');
     }
@@ -55,7 +54,6 @@ try {
     $conn = getWriteDBConnection();
 
     $stmt = $conn->prepare("SELECT id FROM usuarios WHERE telefone = ?");
-
     if (!$stmt) {
         throw new Exception('Erro ao preparar consulta de usuário.');
     }
@@ -80,7 +78,6 @@ try {
             (nome_usuario, email, telefone, senha_hash, confirmado)
             VALUES (?, ?, ?, ?, 1)
         ");
-
         if (!$stmt) {
             throw new Exception('Erro ao preparar cadastro de usuário temporário.');
         }
@@ -93,6 +90,9 @@ try {
 
         $motoristaId = $conn->insert_id;
         $stmt->close();
+        
+        // REGISTRO DE AUDITORIA (LOG)
+        registrarLog($motoristaId, 'ESCRITA', "Usuário temporário criado automaticamente no cadastro de viagem: {$contato}");
     }
 
     $veiculoCompleto = $veiculo . ' - ' . $placa;
@@ -102,7 +102,6 @@ try {
         (motorista_id, veiculo, contato, origem, destino)
         VALUES (?, ?, ?, ?, ?)
     ");
-
     if (!$stmt) {
         throw new Exception('Erro ao preparar cadastro da viagem.');
     }
@@ -113,7 +112,12 @@ try {
         throw new Exception('Erro ao cadastrar viagem.');
     }
 
+    // Pega o ID da viagem recém criada
+    $viagemId = $conn->insert_id;
     $stmt->close();
+    
+    // REGISTRO DE AUDITORIA (LOG)
+    registrarLog($motoristaId, 'ESCRITA', "Nova viagem ID {$viagemId} cadastrada ({$inicial} -> {$final}).");
 
     echo json_encode([
         'success' => true,

@@ -14,6 +14,7 @@ try {
 
     // Suporta tanto requisições JSON (Fetch) quanto Formulário Padrão
     $data = json_decode(file_get_contents('php://input'), true);
+
     $email = trim($data['email'] ?? $_POST['email'] ?? '');
     $senha = trim($data['password'] ?? $_POST['password'] ?? '');
 
@@ -55,6 +56,7 @@ try {
     $stmtRead = $connRead->prepare("SELECT * FROM viagens WHERE motorista_id = ? OR passageiro_id = ?");
     $stmtRead->bind_param("ii", $usuario_id, $usuario_id);
     $stmtRead->execute();
+    
     $res_viagens = $stmtRead->get_result();
     $viagens_dados = [];
     while($v = $res_viagens->fetch_assoc()) {
@@ -78,6 +80,9 @@ try {
     $stmt_del->execute();
     $stmt_del->close();
     
+    // 5. REGISTRO DE AUDITORIA (LOG)
+    registrarLog($usuario_id, 'EXCLUSAO', "O usuário excluiu a própria conta e os dados foram movidos para o cofre LGPD.");
+
     $conn->close();
 
     // Limpa o cookie de sessão do servidor
