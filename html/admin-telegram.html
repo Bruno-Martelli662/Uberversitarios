@@ -5,111 +5,411 @@
     <title>Confirmação Telegram - Admin</title>
     <link rel="stylesheet" href="../css/styles.css">
 </head>
+
 <body>
-    <div class="container">
-        <div class="form-container">
-            <h2 class="title">Verificação Telegram</h2>
 
-            <p style="text-align:center; color: var(--text-light); margin-bottom:20px;">
-                Seu e-mail foi confirmado. Agora envie o código para o Telegram vinculado.
-            </p>
+<div class="container">
+    <div class="form-container">
 
-            <div id="mensagem" style="margin-bottom: 15px; text-align:center;"></div>
+        <h2 class="title">
+            Verificação Telegram
+        </h2>
 
-            <button id="btn-enviar" class="btn btn-primary big" style="width:100%;">
-                Enviar código no Telegram
+        <p style="
+            text-align:center;
+            color: var(--text-light);
+            margin-bottom:20px;
+        ">
+
+            Seu e-mail foi confirmado.
+            Agora envie o código para o Telegram vinculado.
+
+        </p>
+
+        <div id="mensagem"
+             style="
+                margin-bottom:15px;
+                text-align:center;
+             ">
+        </div>
+
+        <button
+            id="btn-enviar"
+            class="btn btn-primary big"
+            style="width:100%;"
+        >
+
+            Enviar código no Telegram
+
+        </button>
+
+        <!-- FORM TELEGRAM -->
+
+        <form id="form-codigo"
+              style="
+                display:none;
+                margin-top:20px;
+              ">
+
+            <div class="input-group">
+
+                <label for="codigo">
+                    Código recebido no Telegram
+                </label>
+
+                <input
+                    type="text"
+                    id="codigo"
+                    maxlength="6"
+                    required
+                >
+            </div>
+
+            <button
+                class="btn btn-primary big"
+                type="submit"
+                style="width:100%;"
+            >
+
+                Entrar no painel admin
+
             </button>
 
-            <form id="form-codigo" style="display:none; margin-top:20px;">
-                <div class="input-group">
-                    <label for="codigo">Código recebido no Telegram</label>
-                    <input type="text" id="codigo" maxlength="6" required>
-                </div>
+        </form>
 
-                <button class="btn btn-primary big" type="submit" style="width:100%;">
-                    Entrar no painel admin
-                </button>
-            </form>
-        </div>
+        <!-- FORM PERGUNTAS -->
+
+        <form id="form-perguntas"
+              style="
+                display:none;
+                margin-top:20px;
+              ">
+
+            <div class="input-group">
+
+                <label id="labelPergunta1"></label>
+
+                <input
+                    type="text"
+                    id="resposta1"
+                    required
+                >
+
+            </div>
+
+            <div class="input-group">
+
+                <label id="labelPergunta2"></label>
+
+                <input
+                    type="text"
+                    id="resposta2"
+                    required
+                >
+
+            </div>
+
+            <button
+                class="btn btn-primary big"
+                type="submit"
+                style="width:100%;"
+            >
+
+                Validar perguntas
+
+            </button>
+
+        </form>
+
     </div>
+</div>
 
 <script>
-const params = new URLSearchParams(window.location.search);
-const token = params.get('token');
 
-const mensagem = document.getElementById('mensagem');
-const btnEnviar = document.getElementById('btn-enviar');
-const formCodigo = document.getElementById('form-codigo');
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
 
-function mostrarMensagem(texto, erro = false) {
+const token =
+    params.get('token');
+
+const mensagem =
+    document.getElementById(
+        'mensagem'
+    );
+
+const btnEnviar =
+    document.getElementById(
+        'btn-enviar'
+    );
+
+const formCodigo =
+    document.getElementById(
+        'form-codigo'
+    );
+
+const formPerguntas =
+    document.getElementById(
+        'form-perguntas'
+    );
+
+function mostrarMensagem(
+    texto,
+    erro = false
+) {
+
     mensagem.textContent = texto;
-    mensagem.style.color = erro ? 'red' : 'green';
+
+    mensagem.style.color =
+        erro ? 'red' : 'green';
 }
 
 if (!token) {
-    mostrarMensagem('Token ausente. Refaça o login administrativo.', true);
+
+    mostrarMensagem(
+        'Token ausente. Refaça o login administrativo.',
+        true
+    );
+
     btnEnviar.disabled = true;
 }
 
-btnEnviar.addEventListener('click', async function() {
+btnEnviar.addEventListener(
+    'click',
+    async function() {
+
     try {
+
         btnEnviar.disabled = true;
-        btnEnviar.textContent = 'Enviando...';
 
-        const res = await fetch('../api/admin-enviar-telegram.php', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ token })
-        });
+        btnEnviar.textContent =
+            'Enviando...';
 
-        const data = await res.json();
+        const res = await fetch(
+            '../api/admin-enviar-telegram.php',
+            {
+                method: 'POST',
+
+                credentials: 'same-origin',
+
+                headers: {
+                    'Content-Type':
+                        'application/json'
+                },
+
+                body: JSON.stringify({
+                    token
+                })
+            }
+        );
+
+        const data =
+            await res.json();
 
         if (data.success) {
-            mostrarMensagem(data.message);
-            formCodigo.style.display = 'block';
-            document.getElementById('codigo').focus();
+
+            mostrarMensagem(
+                data.message
+            );
+
+            formCodigo.style.display =
+                'block';
+
+            document
+                .getElementById(
+                    'codigo'
+                )
+                .focus();
+
         } else {
-            mostrarMensagem(data.message || 'Erro ao enviar Telegram.', true);
+
+            mostrarMensagem(
+                data.message ||
+                'Erro Telegram.',
+                true
+            );
+
+            if (
+                data.fallbackPerguntas
+            ) {
+
+                formPerguntas.style.display =
+                    'block';
+
+                document
+                    .getElementById(
+                        'labelPergunta1'
+                    )
+                    .textContent =
+                        data.perguntas[0];
+
+                document
+                    .getElementById(
+                        'labelPergunta2'
+                    )
+                    .textContent =
+                        data.perguntas[1];
+            }
         }
 
     } catch (error) {
-        mostrarMensagem('Erro ao conectar com o servidor.', true);
+
+    mostrarMensagem(
+        'Telegram indisponível.',
+        true
+    );
+
+    formPerguntas.style.display = 'block';
+
+    document.getElementById(
+        'labelPergunta1'
+    ).textContent =
+        'Sua pergunta de segurança 1';
+
+    document.getElementById(
+        'labelPergunta2'
+    ).textContent =
+        'Sua pergunta de segurança 2';
+
     } finally {
+
         btnEnviar.disabled = false;
-        btnEnviar.textContent = 'Reenviar código no Telegram';
+
+        btnEnviar.textContent =
+            'Reenviar código no Telegram';
     }
 });
 
-formCodigo.addEventListener('submit', async function(e) {
+formCodigo.addEventListener(
+    'submit',
+    async function(e) {
+
     e.preventDefault();
 
-    const codigo = document.getElementById('codigo').value.trim();
+    const codigo =
+        document
+            .getElementById(
+                'codigo'
+            )
+            .value
+            .trim();
 
     try {
-        const res = await fetch('../api/admin-verificar-codigo.php', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ token, codigo })
-        });
 
-        const data = await res.json();
+        const res = await fetch(
+            '../api/admin-verificar-codigo.php',
+            {
+                method: 'POST',
+
+                credentials: 'same-origin',
+
+                headers: {
+                    'Content-Type':
+                        'application/json'
+                },
+
+                body: JSON.stringify({
+
+                    token,
+                    codigo
+                })
+            }
+        );
+
+        const data =
+            await res.json();
 
         if (data.success) {
-            window.location.href = 'admin_logado.html';
+
+            window.location.href =
+                'admin_logado.html';
+
         } else {
-            mostrarMensagem(data.message || 'Código inválido.', true);
+
+            mostrarMensagem(
+                data.message ||
+                'Código inválido.',
+                true
+            );
         }
 
     } catch (error) {
-        mostrarMensagem('Erro ao conectar com o servidor.', true);
+
+        mostrarMensagem(
+            'Erro ao conectar com o servidor.',
+            true
+        );
     }
 });
+
+formPerguntas.addEventListener(
+    'submit',
+    async function(e) {
+
+    e.preventDefault();
+
+    try {
+
+        const res = await fetch(
+            '../api/admin-validar-perguntas.php',
+            {
+                method: 'POST',
+
+                credentials: 'same-origin',
+
+                headers: {
+                    'Content-Type':
+                        'application/json'
+                },
+
+                body: JSON.stringify({
+
+                    token,
+
+                    resposta1:
+                        document
+                            .getElementById(
+                                'resposta1'
+                            )
+                            .value,
+
+                    resposta2:
+                        document
+                            .getElementById(
+                                'resposta2'
+                            )
+                            .value
+                })
+            }
+        );
+
+        const data =
+            await res.json();
+
+        if (data.success) {
+
+            window.location.href =
+                'admin_logado.html';
+
+        } else {
+
+            mostrarMensagem(
+                data.message,
+                true
+            );
+        }
+
+    } catch {
+
+        mostrarMensagem(
+            'Erro ao conectar.',
+            true
+        );
+    }
+});
+
 </script>
+
 </body>
 </html>

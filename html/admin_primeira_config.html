@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Configurar Segurança</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="form-container">
+
+        <h2 class="title">
+            Configurar perguntas de segurança
+        </h2>
+
+        <form id="form-perguntas">
+
+            <div class="input-group">
+                <label>Pergunta 1</label>
+
+                <input
+                    type="text"
+                    id="pergunta1"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label>Resposta 1</label>
+
+                <input
+                    type="text"
+                    id="resposta1"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label>Pergunta 2</label>
+
+                <input
+                    type="text"
+                    id="pergunta2"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label>Resposta 2</label>
+
+                <input
+                    type="text"
+                    id="resposta2"
+                    required
+                >
+            </div>
+
+            <button
+                class="btn btn-primary big"
+                type="submit"
+                style="width:100%;"
+            >
+
+                Salvar perguntas
+
+            </button>
+
+        </form>
+
+        <div id="mensagem"
+             style="
+                margin-top:15px;
+                text-align:center;
+             ">
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+const params = new URLSearchParams(
+    window.location.search
+);
+
+const token = params.get('token');
+
+const form =
+    document.getElementById(
+        'form-perguntas'
+    );
+
+const mensagem =
+    document.getElementById(
+        'mensagem'
+    );
+
+function mostrarMensagem(
+    texto,
+    erro = false
+) {
+
+    mensagem.textContent = texto;
+
+    mensagem.style.color =
+        erro ? 'red' : 'green';
+}
+
+form.addEventListener(
+    'submit',
+    async function(e) {
+
+    e.preventDefault();
+
+    try {
+
+        const res = await fetch(
+            '../api/admin-salvar-perguntas.php',
+            {
+                method: 'POST',
+
+                credentials: 'same-origin',
+
+                headers: {
+                    'Content-Type':
+                        'application/json'
+                },
+
+                body: JSON.stringify({
+
+                    token,
+
+                    pergunta1:
+                        document
+                            .getElementById(
+                                'pergunta1'
+                            )
+                            .value,
+
+                    resposta1:
+                        document
+                            .getElementById(
+                                'resposta1'
+                            )
+                            .value,
+
+                    pergunta2:
+                        document
+                            .getElementById(
+                                'pergunta2'
+                            )
+                            .value,
+
+                    resposta2:
+                        document
+                            .getElementById(
+                                'resposta2'
+                            )
+                            .value
+                })
+            }
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+
+            window.location.href =
+                'admin-telegram.html?token='
+                + token;
+
+        } else {
+
+            mostrarMensagem(
+                data.message ||
+                'Erro ao salvar.',
+                true
+            );
+        }
+
+    } catch {
+
+        mostrarMensagem(
+            'Erro ao conectar.',
+            true
+        );
+    }
+});
+
+</script>
+
+</body>
+</html>

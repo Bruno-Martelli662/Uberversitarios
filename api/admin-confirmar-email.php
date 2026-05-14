@@ -34,6 +34,7 @@ if ($result->num_rows === 0) {
 }
 
 $admin = $result->fetch_assoc();
+
 $stmt->close();
 
 $stmt = $conn->prepare("
@@ -48,9 +49,46 @@ if (!$stmt) {
 
 $stmt->bind_param("i", $admin['id']);
 $stmt->execute();
+
 $stmt->close();
+
+$stmt = $conn->prepare("
+    SELECT perguntas_configuradas
+    FROM user_adm
+    WHERE id = ?
+");
+
+if (!$stmt) {
+    die("Erro interno.");
+}
+
+$stmt->bind_param("i", $admin['id']);
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+$config = $result->fetch_assoc();
+
+$stmt->close();
+
+if ((int)$config['perguntas_configuradas'] !== 1) {
+
+    header(
+        "Location: ../html/admin_primeira_config.html?token="
+        . urlencode($token)
+    );
+
+    $conn->close();
+
+    exit;
+}
+
+header(
+    "Location: ../html/admin-telegram.html?token="
+    . urlencode($token)
+);
+
 $conn->close();
 
-header("Location: ../html/admin-telegram.html?token=" . urlencode($token));
 exit;
 ?>

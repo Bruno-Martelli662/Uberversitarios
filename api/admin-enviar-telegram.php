@@ -89,8 +89,43 @@ try {
     $mensagem = "Código de acesso admin Uberversitários: {$codigo}\nExpira em 5 minutos.";
 
     if (!enviarTelegram($admin['telegram_id'], $mensagem)) {
-        throw new Exception('Falha ao enviar código pelo Telegram.');
-    }
+
+    $stmt = $conn->prepare("
+        SELECT
+            pergunta_seguranca_1,
+            pergunta_seguranca_2
+        FROM user_adm
+        WHERE id = ?
+    ");
+
+    $stmt->bind_param("i", $admin['id']);
+    $stmt->execute();
+
+    $resultPerguntas = $stmt->get_result();
+
+    $perguntas = $resultPerguntas->fetch_assoc();
+
+    $stmt->close();
+
+    echo json_encode([
+
+        'success' => false,
+
+        'fallbackPerguntas' => true,
+
+        'message' =>
+            'Telegram indisponível.',
+
+        'perguntas' => [
+
+            $perguntas['pergunta_seguranca_1'],
+            $perguntas['pergunta_seguranca_2']
+        ]
+
+    ], JSON_UNESCAPED_UNICODE);
+
+    exit;
+}
 
     $response = [
         'success' => true,
@@ -111,11 +146,6 @@ try {
     }
 }
 
-if (ob_get_level()) ob_clean();
-
 echo json_encode($response, JSON_UNESCAPED_UNICODE);
-
-if (ob_get_level()) ob_end_flush();
-
 exit;
 ?>
