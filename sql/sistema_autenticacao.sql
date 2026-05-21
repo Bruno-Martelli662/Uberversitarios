@@ -286,3 +286,37 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+CREATE TABLE IF NOT EXISTS consentimentos_cookies (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NULL,
+    aceitou TINYINT(1) NOT NULL DEFAULT 1,
+    ip_origem VARCHAR(45) NOT NULL,
+    user_agent VARCHAR(255) NULL,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_cookie_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+        ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS denuncias_viagens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    viagem_id INT NOT NULL,
+    denunciante_id INT NULL,
+    motivo VARCHAR(255) NOT NULL,
+    detalhes TEXT NULL,
+    status ENUM('PENDENTE','ANALISADA','IGNORADA') NOT NULL DEFAULT 'PENDENTE',
+    ip_origem VARCHAR(45) NOT NULL,
+    criada_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    analisada_em DATETIME NULL,
+    CONSTRAINT fk_denuncia_viagem
+        FOREIGN KEY (viagem_id) REFERENCES viagens(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_denuncia_usuario
+        FOREIGN KEY (denunciante_id) REFERENCES usuarios(id)
+        ON DELETE SET NULL
+);
+
+CREATE INDEX idx_denuncias_status ON denuncias_viagens(status);
+CREATE INDEX idx_denuncias_viagem ON denuncias_viagens(viagem_id);
+CREATE INDEX idx_cookies_usuario ON consentimentos_cookies(usuario_id);
