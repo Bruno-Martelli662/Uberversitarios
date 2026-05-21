@@ -240,3 +240,24 @@ footer {
   padding: 40px;
   margin-top: 80px;
 }
+
+.cookie-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: #1f1f1f;
+  color: white;
+  padding: 18px;
+  border-radius: 14px;
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  z-index: 9999;
+}
+
+.cookie-banner p {
+  margin: 0;
+  font-size: 14px;
+}
