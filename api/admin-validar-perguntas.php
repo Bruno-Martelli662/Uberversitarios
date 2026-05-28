@@ -21,13 +21,20 @@ try {
 
     $token = trim($data['token'] ?? '');
 
-    $r1 = normalizar(
-        $data['resposta1'] ?? ''
-    );
-
-    $r2 = normalizar(
-        $data['resposta2'] ?? ''
-    );
+    if (!validarTokenHex($token)) {
+        throw new Exception('Token inválido.');
+    }
+    
+    $r1 = normalizar($data['resposta1'] ?? '');
+    $r2 = normalizar($data['resposta2'] ?? '');
+    
+    if ($r1 === '' || $r2 === '') {
+        throw new Exception('Respostas obrigatórias.');
+    }
+    
+    if (mb_strlen($r1) > 100 || mb_strlen($r2) > 100) {
+        throw new Exception('Respostas muito longas.');
+    }
 
     $conn = getAdminDBConnection();
 

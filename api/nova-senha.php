@@ -28,16 +28,16 @@ try {
     error_log("Dados recebidos em nova-senha.php: " . json_encode(array_diff_key($data, ['novaSenha' => ''])));
 
     $token = trim($data['token'] ?? '');
+    $token = trim($data['token'] ?? '');
     $senhaHash = trim($data['novaSenha'] ?? '');
-
-    if ($token === '') {
-        throw new Exception('Token de recuperação é obrigatório.');
+    
+    if (!validarTokenHex($token)) {
+        throw new Exception('Token de recuperação inválido.');
     }
-
-    if ($senhaHash === '') {
-        throw new Exception('Nova senha é obrigatória.');
+    
+    if (!validarHashSenha($senhaHash)) {
+        throw new Exception('Hash de senha inválido.');
     }
-
     $conn = getAuthDBConnection();
 
     $stmt = $conn->prepare("

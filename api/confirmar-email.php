@@ -1,9 +1,9 @@
 <?php
 require_once __DIR__ . '/../config.php';
 
-$token = $_GET['token'] ?? '';
+$token = trim($_GET['token'] ?? '');
 
-if (empty($token)) {
+if (!validarTokenHex($token)) {
     die("Token de confirmação inválido.");
 }
 

@@ -60,6 +60,37 @@
         box.textContent = "Erro de conexão ao buscar os dados.";
       }
     });
+
+    async function apagarViagem(viagemId) {
+        if (!confirm('Tem certeza que deseja apagar esta viagem? Esta ação não pode ser desfeita.')) {
+            return;
+        }
+      
+        const token = localStorage.getItem('authToken');
+      
+        try {
+            const response = await fetch('../api/deletar_minha_viagem.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token
+                },
+                body: JSON.stringify({ viagem_id: viagemId })
+            });
+          
+            const data = await response.json();
+          
+            if (data.success) {
+                alert('Viagem apagada com sucesso.');
+                window.location.reload();
+            } else {
+                alert('Erro: ' + (data.message || 'Não foi possível apagar.'));
+            }
+        } catch (error) {
+            alert('Erro de conexão.');
+        }
+    }
   </script>
 </body>
 </html>

@@ -2,10 +2,10 @@
 require_once __DIR__ . '/../config.php';
 header('Content-Type: application/json');
 
-$token = $_GET['token'] ?? '';
-if (!$token) {
+$token = trim($_GET['token'] ?? '');
+if (!validarTokenHex($token)) {
     http_response_code(401);
-    echo json_encode(['error' => 'Token não fornecido']);
+    echo json_encode(['error' => 'Token inválido']);
     exit;
 }
 

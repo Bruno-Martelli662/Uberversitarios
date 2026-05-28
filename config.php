@@ -302,6 +302,7 @@ function enviarEmail($para, $assunto, $mensagem, $html = true) {
     }
 }
 
+
 function enviarTelegram($chatId, $mensagem) {
     $url = "https://api.telegram.org/bot" . TELEGRAM_BOT_TOKEN . "/sendMessage";
 
@@ -329,8 +330,121 @@ function validarEmail($email) {
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
+/*
+ * Valida um token hexadecimal de 64 caracteres (gerado por gerarToken()).
+ * Retorna true se válido, false caso contrário.
+ */
+function validarTokenHex($token) {
+    return is_string($token) && preg_match('/^[a-f0-9]{64}$/', $token) === 1;
+}
+
+/*
+ * Valida hash SHA-256 em hex (64 chars).
+ */
+function validarHashSenha($hash) {
+    return is_string($hash) && preg_match('/^[a-f0-9]{64}$/', $hash) === 1;
+}
+
+/*
+ * Valida nome de pessoa: letras (com acentos), espaço, apóstrofo e hífen.
+ * 2 a 100 caracteres.
+ */
+function validarNome($nome) {
+    return is_string($nome) && preg_match("/^[A-Za-zÀ-ÿ'\-\s]{2,100}$/u", $nome) === 1;
+}
+
+/*
+ * Valida texto de origem/destino de viagem.
+ * Letras, números, espaços, vírgula, ponto, hífen, apóstrofo.
+ * 2 a 150 caracteres.
+ */
+function validarLocalizacao($texto) {
+    return is_string($texto) && preg_match("/^[A-Za-z0-9À-ÿ',.\-\s]{2,150}$/u", $texto) === 1;
+}
+
+/*
+ * Valida código numérico de N dígitos (TOTP, código Telegram, etc).
+ */
+function validarCodigoNumerico($codigo, $digitos = 6) {
+    return is_string($codigo) && preg_match('/^\d{' . (int)$digitos . '}$/', $codigo) === 1;
+}
+
+/*
+ * Valida o telefone.
+ */
+
 function validarTelefone($telefone) {
     $telefone = preg_replace('/[^0-9]/', '', $telefone);
     return preg_match('/^([1-9]{2}|0[1-9]{2})?(9?[2-9][0-9]{7,8})$/', $telefone);
 }
+
+/*
+ * Verifica se a requisição vem de um usuário comum autenticado.
+ * Lê o token do header Authorization (ou cookie authToken).
+ * Em caso de falha, encerra a requisição com 401 e JSON de erro.
+ *
+ * Retorna o ID do usuário autenticado em caso de sucesso.
+ */
+function exigirUsuarioLogado() {
+    $headers = function_exists('getallheaders') ? getallheaders() : [];
+
+    $token = trim(
+        $_COOKIE['authToken']
+        ?? $headers['Authorization']
+        ?? ''
+    );
+
+    if (!validarTokenHex($token)) {
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Não autenticado.'
+        ]);
+        exit;
+    }
+
+    $conn = getAuthDBConnection();
+
+    $stmt = $conn->prepare("
+        SELECT usuario_id
+        FROM sessoes
+        WHERE token_sessao = ?
+          AND data_expiracao > NOW()
+        LIMIT 1
+    ");
+
+    if (!$stmt) {
+        error_log("exigirUsuarioLogado: falha no prepare: " . $conn->error);
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Erro interno.'
+        ]);
+        $conn->close();
+        exit;
+    }
+
+    $stmt->bind_param("s", $token);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 0) {
+        $stmt->close();
+        $conn->close();
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Sessão inválida ou expirada.'
+        ]);
+        exit;
+    }
+
+    $sessao = $result->fetch_assoc();
+    $stmt->close();
+    $conn->close();
+
+    return (int)$sessao['usuario_id'];
+}
 ?>
+
+

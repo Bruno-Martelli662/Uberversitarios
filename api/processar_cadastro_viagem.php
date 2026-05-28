@@ -23,7 +23,7 @@ try {
 
     $contato = preg_replace('/[^0-9]/', '', $contato);
 
-    if (!preg_match('/^[A-Za-zÀ-ÿ\s]{2,100}$/u', $nome)) {
+    if (!validarNome($nome)) {
         throw new Exception('Nome inválido.');
     }
 
@@ -39,11 +39,11 @@ try {
     }
 
     // Validação tamanho origem/destino
-    if (strlen($inicial) < 2 || strlen($inicial) > 150) {
+    if (!validarLocalizacao($inicial)) {
         throw new Exception('Origem inválida.');
     }
 
-    if (strlen($final) < 2 || strlen($final) > 150) {
+    if (!validarLocalizacao($final)) {
         throw new Exception('Destino inválido.');
     }
 

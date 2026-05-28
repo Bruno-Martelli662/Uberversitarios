@@ -10,10 +10,10 @@ $conn = null;
 try {
     session_start();
 
-    $headers = getallheaders();
     $token = $_COOKIE['authToken'] ?? $headers['Authorization'] ?? $_GET['token'] ?? '';
-    if (empty($token)) {
-        throw new Exception('Token não fornecido');
+    $token = trim($token);
+    if (!validarTokenHex($token)) {
+        throw new Exception('Token inválido');
     }
 
     $conn = getAuthDBConnection();

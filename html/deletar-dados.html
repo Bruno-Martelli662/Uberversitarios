@@ -2,118 +2,378 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Confirmar Exclusão</title>
+    <title>Meus Dados e Conta</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
-        .dados-box {
-            background: #f9f9f9;
+        .secao-dados {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .secao-dados h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .info-linha {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .info-linha:last-child {
+            border-bottom: none;
+        }
+
+        .info-rotulo {
+            color: #777;
+            font-weight: 500;
+        }
+
+        .info-valor {
+            color: #333;
+            text-align: right;
+        }
+
+        .viagem-card {
+            background: white;
             border: 1px solid #ddd;
             border-radius: 10px;
             padding: 15px;
-            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        .viagem-card h4 {
+            margin: 0 0 8px 0;
+            color: #ff5a5f;
+            font-size: 15px;
+        }
+
+        .viagem-detalhes {
             font-size: 13px;
-            max-height: 250px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            color: #333;
-            font-family: monospace; /* Fonte monoespaçada para o JSON ficar bonito */
+            color: #555;
+            margin-bottom: 12px;
+        }
+
+        .viagem-detalhes p {
+            margin: 4px 0;
+        }
+
+        .btn-apagar-viagem {
+            background: transparent;
+            border: 1px solid #d9534f;
+            color: #d9534f;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-apagar-viagem:hover {
+            background: #d9534f;
+            color: white;
+        }
+
+        .mensagem-vazio {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .zona-perigo {
+            background: #fff5f5;
+            border: 2px solid #ff5a5f;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .zona-perigo h3 {
+            color: #c62828;
+            margin-top: 0;
+        }
+
+        .loading {
+            text-align: center;
+            color: #999;
+            padding: 30px;
         }
     </style>
 </head>
 <body>
+
+<!-- Verificação de sessão: bloqueia acesso antes de qualquer renderização -->
+<script>
+    (function () {
+        const token = localStorage.getItem('authToken');
+
+        if (!token) {
+            window.location.replace('login.html');
+            return;
+        }
+
+        // Valida o token contra o servidor antes de mostrar a página
+        fetch('../api/verificar-sessao.php?token=' + encodeURIComponent(token))
+            .then(res => res.json())
+            .then(data => {
+                if (!data.autenticado) {
+                    localStorage.removeItem('authToken');
+                    window.location.replace('login.html');
+                }
+            })
+            .catch(() => {
+                window.location.replace('login.html');
+            });
+    })();
+</script>
+
 <header class="header">
     <img src="../logo.jpeg" class="logo" alt="Uberversitários Logo">
+    <div>
+        <button class="btn btn-outline" onclick="window.location.href='index_cadastrado.html'">
+            Voltar
+        </button>
+    </div>
 </header>
-<div class="container">
-    <div class="form-container" style="max-width: 600px;">
-        <h2 class="title" style="color: #ff5a5f;">Atenção: Exclusão Definitiva</h2>
-        <p style="text-align: center; color: #777; margin-bottom: 10px;">
-            Em conformidade com a LGPD, abaixo estão todos os dados vinculados à sua conta. Seus dados públicos serão apagados e uma cópia será arquivada no cofre de segurança do sistema:
-        </p>
-        
-        <div id="dados-view" class="dados-box">Carregando seus dados...</div>
 
-        <button type="button" id="btnBaixarDados" class="btn btn-outline" style="width: 100%; margin-bottom: 25px; display: none;" onclick="baixarDados()">
+<div class="container">
+    <div class="form-container" style="max-width: 700px;">
+
+        <h2 class="title">Meus dados</h2>
+        <p style="text-align: center; color: #777; margin-bottom: 25px;">
+            Em conformidade com a LGPD, aqui estão todos os dados vinculados à sua conta.
+        </p>
+
+        <!-- DADOS PESSOAIS -->
+        <div class="secao-dados">
+            <h3>Informações pessoais</h3>
+            <div id="dados-pessoais">
+                <div class="loading">Carregando...</div>
+            </div>
+        </div>
+
+        <!-- VIAGENS -->
+        <div class="secao-dados">
+            <h3>Minhas viagens</h3>
+            <div id="lista-viagens">
+                <div class="loading">Carregando...</div>
+            </div>
+        </div>
+
+        <!-- DOWNLOAD LGPD -->
+        <button type="button" id="btnBaixarDados" class="btn btn-outline"
+                style="width: 100%; margin-bottom: 20px; display: none;"
+                onclick="baixarDados()">
             📥 Baixar meus dados (JSON)
         </button>
 
-        <form id="formDeletar">
-            <p style="text-align: center; color: #333; margin-bottom: 15px; font-weight: 600;">
-                Para confirmar a exclusão, digite suas credenciais:
+        <!-- ZONA DE PERIGO: EXCLUSÃO DEFINITIVA -->
+        <div class="zona-perigo">
+            <h3>Zona de perigo: excluir conta</h3>
+
+            <p style="color: #555; margin-bottom: 15px; font-size: 14px;">
+                Esta ação é <strong>irreversível</strong>. Sua conta será desativada e
+                todos os dados arquivados em conformidade com a LGPD por 6 meses,
+                após esse prazo são apagados permanentemente.
             </p>
 
-            <div class="input-group">
-                <label for="email">E-mail da Conta</label>
-                <input type="email" id="email" name="email" required>
-            </div>                
-            
-            <div class="input-group">
-                <label for="password">Senha</label>
-                <input type="password" id="password" name="password" required>
-            </div>
+            <form id="formDeletar">
+                <p style="color: #333; margin-bottom: 12px; font-weight: 600; font-size: 14px;">
+                    Para confirmar, digite suas credenciais:
+                </p>
 
-            <button type="submit" id="btnDeletar" class="btn btn-primary big" style="width: 100%; margin-bottom: 10px;">
-                Confirmar Exclusão
-            </button>
-            <button type="button" class="btn btn-outline" style="width: 100%;" onclick="window.location.href='index_cadastrado.html'">
-                Cancelar
-            </button>
-        </form>
+                <div class="input-group">
+                    <label for="email">E-mail da conta</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <button type="submit" id="btnDeletar" class="btn btn-primary big" style="width: 100%;">
+                    Confirmar exclusão definitiva
+                </button>
+            </form>
+        </div>
+
     </div>
 </div>
 
 <script>
+    // Guarda os dados crus para o download em JSON
+    let dadosCrus = null;
+
+    // ==================== CARREGAR DADOS ====================
+
     document.addEventListener('DOMContentLoaded', async () => {
         const token = localStorage.getItem('authToken');
-        const box = document.getElementById('dados-view');
-        const btnBaixar = document.getElementById('btnBaixarDados');
-        
-        if (!token) {
-            box.textContent = "Sessão não encontrada. Faça login novamente para visualizar seus dados.";
-            return;
-        }
+        if (!token) return; // o redirecionador já cuidou
 
         try {
-            const response = await fetch(`../api/meus_dados.php?token=${encodeURIComponent(token)}`);
+            const response = await fetch(
+                '../api/meus_dados.php?token=' + encodeURIComponent(token)
+            );
             const result = await response.json();
 
-            if (result.success) {
-                box.textContent = JSON.stringify(result.dados, null, 4);
-                btnBaixar.style.display = 'block';
-            } else {
-                box.textContent = "Erro ao carregar os dados: " + result.message;
+            if (!result.success) {
+                document.getElementById('dados-pessoais').innerHTML =
+                    '<div class="mensagem-vazio">Erro ao carregar: ' + escapar(result.message) + '</div>';
+                document.getElementById('lista-viagens').innerHTML = '';
+                return;
             }
+
+            dadosCrus = result.dados;
+            renderizarDadosPessoais(result.dados.pessoais);
+            renderizarViagens(result.dados.viagens);
+            document.getElementById('btnBaixarDados').style.display = 'block';
+
         } catch (error) {
-            box.textContent = "Erro de conexão ao buscar os dados.";
+            document.getElementById('dados-pessoais').innerHTML =
+                '<div class="mensagem-vazio">Erro de conexão.</div>';
+            document.getElementById('lista-viagens').innerHTML = '';
         }
     });
 
-    function baixarDados() {
-        const box = document.getElementById('dados-view');
-        const conteudo = box.textContent;
+    // ==================== RENDERIZAÇÃO ====================
 
-       const blob = new Blob([conteudo], { type: 'application/json' });
-        
+    function escapar(texto) {
+        return String(texto ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function renderizarDadosPessoais(pessoais) {
+        const container = document.getElementById('dados-pessoais');
+
+        if (!pessoais) {
+            container.innerHTML = '<div class="mensagem-vazio">Nenhum dado encontrado.</div>';
+            return;
+        }
+
+        const linhas = [
+            { rotulo: 'Nome', valor: pessoais.nome_usuario },
+            { rotulo: 'E-mail', valor: pessoais.email },
+            { rotulo: 'Telefone', valor: pessoais.telefone },
+            { rotulo: 'E-mail confirmado', valor: pessoais.confirmado == 1 ? 'Sim' : 'Não' }
+        ];
+
+        container.innerHTML = linhas.map(item => `
+            <div class="info-linha">
+                <span class="info-rotulo">${escapar(item.rotulo)}</span>
+                <span class="info-valor">${escapar(item.valor)}</span>
+            </div>
+        `).join('');
+    }
+
+    function renderizarViagens(viagens) {
+        const container = document.getElementById('lista-viagens');
+
+        if (!Array.isArray(viagens) || viagens.length === 0) {
+            container.innerHTML = '<div class="mensagem-vazio">Você não tem viagens cadastradas.</div>';
+            return;
+        }
+
+        container.innerHTML = viagens.map(v => `
+            <div class="viagem-card">
+                <h4>${escapar(v.origem)} → ${escapar(v.destino)}</h4>
+                <div class="viagem-detalhes">
+                    <p><strong>Veículo:</strong> ${escapar(v.veiculo)}</p>
+                    <p><strong>Criada em:</strong> ${escapar(formatarData(v.criada_em))}</p>
+                </div>
+                <button class="btn-apagar-viagem" onclick="apagarViagem(${Number(v.id)})">
+                    Apagar esta viagem
+                </button>
+            </div>
+        `).join('');
+    }
+
+    function formatarData(dataIso) {
+        if (!dataIso) return '';
+        const d = new Date(dataIso.replace(' ', 'T'));
+        if (isNaN(d)) return dataIso;
+        return d.toLocaleDateString('pt-BR') + ' ' +
+               d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ==================== APAGAR VIAGEM ====================
+
+    async function apagarViagem(viagemId) {
+        if (!confirm('Apagar esta viagem? Esta ação não pode ser desfeita.')) {
+            return;
+        }
+
+        const token = localStorage.getItem('authToken');
+
+        try {
+            const response = await fetch('../api/deletar_minha_viagem.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token
+                },
+                body: JSON.stringify({ viagem_id: viagemId })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Viagem apagada.');
+                window.location.reload();
+            } else {
+                alert('Erro: ' + (data.message || 'Não foi possível apagar.'));
+            }
+        } catch (error) {
+            alert('Erro de conexão.');
+        }
+    }
+
+    // ==================== DOWNLOAD LGPD ====================
+
+    function baixarDados() {
+        if (!dadosCrus) {
+            alert('Dados ainda não carregados.');
+            return;
+        }
+
+        const conteudo = JSON.stringify(dadosCrus, null, 4);
+        const blob = new Blob([conteudo], { type: 'application/json' });
         const url = window.URL.createObjectURL(blob);
+
         const a = document.createElement('a');
         a.href = url;
-        a.download = "meus_dados_uberversitarios.json";
+        a.download = 'meus_dados_uberversitarios.json';
         document.body.appendChild(a);
-        a.click(); 
-        document.body.removeChild(a); 
+        a.click();
+        document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
     }
 
-    
-    document.getElementById('formDeletar').addEventListener('submit', async function(e) {
-        e.preventDefault(); 
-        
-        const mensagemConfirmacao = 
+    // ==================== EXCLUSÃO DA CONTA ====================
+
+    document.getElementById('formDeletar').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const mensagemConfirmacao =
             "Tem certeza absoluta?\n\n" +
-            "Devido à natureza da nossa plataforma de caronas universitárias, que exige identificação e rastreabilidade para garantir a segurança de todos os estudantes, estamos impossibilitados de realizar a exclusão apenas parcial dos seus dados para que você continue usando o site.\n\n" +
-            "Ao prosseguir, sua conta será totalmente desativada, você perderá o acesso e as funções operacionais cessarão. Esta ação é irreversível.\n\n" +
+            "Devido à natureza da plataforma de caronas universitárias, que exige identificação " +
+            "e rastreabilidade para garantir a segurança de todos os estudantes, não é possível " +
+            "excluir apenas parte dos dados mantendo a conta ativa.\n\n" +
+            "Ao prosseguir, sua conta será totalmente desativada e esta ação é irreversível.\n\n" +
             "Deseja confirmar a exclusão?";
 
         if (!confirm(mensagemConfirmacao)) {
@@ -134,13 +394,13 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email, password: password })
             });
-            
+
             const result = await response.json();
 
             if (result.success) {
                 alert(result.message);
-                localStorage.removeItem('authToken'); 
-                window.location.href = 'index.html'; 
+                localStorage.removeItem('authToken');
+                window.location.href = 'index.html';
             } else {
                 alert("Erro: " + result.message);
             }
@@ -153,5 +413,6 @@
         }
     });
 </script>
+
 </body>
 </html>

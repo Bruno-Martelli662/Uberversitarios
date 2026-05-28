@@ -21,20 +21,19 @@ try {
 
     $token = trim($data['token'] ?? '');
 
-    $resposta1 =
-        trim($data['resposta1'] ?? '');
-
-    $resposta2 =
-        trim($data['resposta2'] ?? '');
-
-    if (
-        !$token ||
-        !$resposta1 ||
-        !$resposta2
-    ) {
-        throw new Exception(
-            'Preencha todos os campos.'
-        );
+    $resposta1 = trim($data['resposta1'] ?? '');
+    $resposta2 = trim($data['resposta2'] ?? '');
+    
+    if (!validarTokenHex($token)) {
+        throw new Exception('Token inválido.');
+    }
+    
+    if ($resposta1 === '' || $resposta2 === '') {
+        throw new Exception('Preencha todos os campos.');
+    }
+    
+    if (mb_strlen($resposta1) > 100 || mb_strlen($resposta2) > 100) {
+        throw new Exception('Respostas muito longas.');
     }
 
     $hash1 = hash(

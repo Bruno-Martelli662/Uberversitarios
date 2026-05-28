@@ -16,6 +16,9 @@ try {
         throw new Exception('Método não permitido.');
     }
 
+    // >>> Valida sessão e obtém o ID do usuário logado <
+    $usuarioId = exigirUsuarioLogado();
+
     $data = json_decode(file_get_contents('php://input'), true);
 
     if (!is_array($data)) {
@@ -25,58 +28,22 @@ try {
     $codigo = trim($data['codigo'] ?? '');
     $secret = trim($data['secret'] ?? '');
 
-    if (!preg_match('/^\d{6}$/', $codigo)) {
+    if (!validarCodigoNumerico($codigo, 6)) {
         throw new Exception('Código 2FA inválido.');
     }
-    
-    // Regex de validação — secret Base32
+
+    // Regex de validação — secret Base32 (RFC 4648)
     if (!preg_match('/^[A-Z2-7]{16,32}$/', $secret)) {
         throw new Exception('Secret 2FA inválido.');
     }
-
-    if ($codigo === '' || $secret === '') {
-        throw new Exception('Dados inválidos para ativação do 2FA');
-    }
-
-    $headers = getallheaders();
-    $token = $headers['Authorization'] ?? '';
-
-    if (empty($token)) {
-        throw new Exception('Token de autenticação não fornecido');
-    }
-
-    $conn = getAuthDBConnection();
-
-    $stmt = $conn->prepare("
-        SELECT usuario_id 
-        FROM sessoes 
-        WHERE token_sessao = ? 
-        AND data_expiracao > NOW()
-    ");
-
-    if (!$stmt) {
-        throw new Exception('Erro na preparação da consulta.');
-    }
-
-    $stmt->bind_param("s", $token);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-
-    if ($result->num_rows === 0) {
-        throw new Exception('Sessão inválida ou expirada');
-    }
-
-    $sessao = $result->fetch_assoc();
-    $userId = $sessao['usuario_id'];
-
-    $stmt->close();
 
     $ga = new GoogleAuthenticator();
 
     if (!$ga->verifyCode($secret, $codigo, 2)) {
         throw new Exception('Código de verificação inválido');
     }
+
+    $conn = getAuthDBConnection();
 
     $stmt = $conn->prepare("
         UPDATE usuarios 
@@ -88,13 +55,17 @@ try {
         throw new Exception('Erro na preparação da atualização.');
     }
 
-    $stmt->bind_param("si", $secret, $userId);
+    $stmt->bind_param("si", $secret, $usuarioId);
 
     if (!$stmt->execute()) {
         throw new Exception('Erro ao ativar 2FA no banco de dados');
     }
 
+    error_log("ativar-2fa: UPDATE executado. usuarioId={$usuarioId}, affected_rows=" . $stmt->affected_rows);
+
     $stmt->close();
+
+    registrarLog($usuarioId, 'ALTERACAO', "Usuário {$usuarioId} ativou 2FA.");
 
     $response = [
         'success' => true,

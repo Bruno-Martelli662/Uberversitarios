@@ -2,9 +2,9 @@
 require_once __DIR__ . '/../config.php';
 header('Content-Type: application/json; charset=utf-8');
 
-$token = $_GET['token'] ?? '';
-if (empty($token)) {
-    echo json_encode(['success' => false, 'message' => 'Token não fornecido']);
+$token = trim($_GET['token'] ?? '');
+if (!validarTokenHex($token)) {
+    echo json_encode(['success' => false, 'message' => 'Token inválido']);
     exit;
 }
 
@@ -29,7 +29,7 @@ $dados_pessoais = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 $connRead = getReadDBConnection();
-$stmtViagens = $connRead->prepare("SELECT origem, destino, veiculo, criada_em FROM viagens WHERE motorista_id = ?");
+$stmtViagens = $connRead->prepare("SELECT id, origem, destino, veiculo, criada_em FROM viagens WHERE motorista_id = ?");
 $stmtViagens->bind_param("i", $usuario_id);
 $stmtViagens->execute();
 $resultadoViagens = $stmtViagens->get_result();

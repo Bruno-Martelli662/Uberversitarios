@@ -24,12 +24,24 @@ try {
 
     $email = trim($data['email'] ?? '');
     $senhaHash = trim($data['senha'] ?? '');
-    $codigo2FA = $data['codigo2FA'] ?? null;
+    $codigo2FA = trim($data['codigo2FA'] ?? '');
 
     if ($email === '' || $senhaHash === '') {
         throw new Exception('E-mail e senha são obrigatórios.');
     }
 
+    if (!validarEmail($email)) {
+        throw new Exception('E-mail ou senha incorretos.');
+    }
+
+    if (!validarHashSenha($senhaHash)) {
+        throw new Exception('E-mail ou senha incorretos.');
+    }
+
+    if ($codigo2FA !== '' && !validarCodigoNumerico($codigo2FA, 6)) {
+        throw new Exception('Código 2FA inválido.');
+    }
+    
     $conn = getAuthDBConnection();
 
     $stmt = $conn->prepare("

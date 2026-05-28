@@ -22,6 +22,14 @@ try {
         throw new Exception("E-mail e senha são obrigatórios.");
     }
 
+    if (!validarEmail($email)) {
+        throw new Exception("E-mail inválido.");
+    }
+
+    if (mb_strlen($senha) < 8 || mb_strlen($senha) > 200) {
+        throw new Exception("Senha inválida.");
+    }
+
     $conn = getAuthDBConnection();
 
     // 1. Verifica credenciais
@@ -74,15 +82,15 @@ try {
     $stmt_cofre->execute();
     $stmt_cofre->close();
 
-    // 4. Deleta da base principal
+    // 4. REGISTRA O LOG ANTES DE DELETAR (a FK depende do usuário ainda existir)
+    registrarLog($usuario_id, 'EXCLUSAO', "O usuário excluiu a própria conta e os dados foram movidos para o cofre LGPD.");
+
+    // 5. Deleta da base principal
     $stmt_del = $conn->prepare("DELETE FROM usuarios WHERE id = ?");
     $stmt_del->bind_param("i", $usuario_id);
     $stmt_del->execute();
     $stmt_del->close();
     
-    // 5. REGISTRO DE AUDITORIA (LOG)
-    registrarLog($usuario_id, 'EXCLUSAO', "O usuário excluiu a própria conta e os dados foram movidos para o cofre LGPD.");
-
     $conn->close();
 
     // Limpa o cookie de sessão do servidor

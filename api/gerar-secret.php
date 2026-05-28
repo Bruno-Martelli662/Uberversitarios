@@ -10,10 +10,10 @@ $conn = null;
 
 try {
     $headers = getallheaders();
-    $token = $headers['Authorization'] ?? '';
-
-    if (empty($token)) {
-        throw new Exception('Token de autenticação não fornecido');
+    $token = trim($headers['Authorization'] ?? '');
+    
+    if (!validarTokenHex($token)) {
+        throw new Exception('Token de autenticação inválido');
     }
 
     $conn = getAuthDBConnection();
