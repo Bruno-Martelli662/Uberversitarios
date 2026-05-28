@@ -144,6 +144,82 @@ function getDBConnection() {
     return getAuthDBConnection();
 }
 
+/*
+ * Verifica se a requisição vem de um admin autenticado.
+ * Lê o cookie 'adminToken' e confere contra user_adm.admin_sessao_token.
+ * Em caso de falha, encerra a requisição com 401 e JSON de erro.
+ *
+ * Retorna o ID do admin autenticado em caso de sucesso.
+ */
+function exigirAdminAutenticado() {
+    $token = $_COOKIE['adminToken'] ?? '';
+
+    // Valida formato antes de qualquer query (defesa em profundidade)
+    if (!preg_match('/^[a-f0-9]{64}$/', $token)) {
+        http_response_code(401);
+        echo json_encode([
+            'status'  => 'erro',
+            'success' => false,
+            'message' => 'Não autenticado.'
+        ]);
+        exit;
+    }
+
+    $conn = getAdminDBConnection();
+
+    $stmt = $conn->prepare("
+        SELECT id
+        FROM user_adm
+        WHERE admin_sessao_token = ?
+          AND admin_sessao_expira > NOW()
+        LIMIT 1
+    ");
+
+    if (!$stmt) {
+        error_log("exigirAdminAutenticado: falha no prepare: " . $conn->error);
+        http_response_code(500);
+        echo json_encode([
+            'status'  => 'erro',
+            'success' => false,
+            'message' => 'Erro interno.'
+        ]);
+        $conn->close();
+        exit;
+    }
+
+    $stmt->bind_param("s", $token);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 0) {
+        $stmt->close();
+        $conn->close();
+
+        // Limpa cookie inválido do navegador
+        setcookie('adminToken', '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'httponly' => true,
+            'samesite' => 'Lax',
+            'secure'   => false
+        ]);
+
+        http_response_code(401);
+        echo json_encode([
+            'status'  => 'erro',
+            'success' => false,
+            'message' => 'Sessão admin inválida ou expirada.'
+        ]);
+        exit;
+    }
+
+    $admin = $result->fetch_assoc();
+    $stmt->close();
+    $conn->close();
+
+    return (int)$admin['id'];
+}
+
 // FUNÇÃO PARA REGISTRAR LOGS DE AUDITORIA
 function registrarLog($usuario_id, $acao, $descricao) {
     $conn = getAdminDBConnection();

@@ -3,6 +3,9 @@ require_once __DIR__ . '/../config.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
+// >>> Bloqueia qualquer requisição não autenticada como admin <
+$adminId = exigirAdminAutenticado();
+
 $conn = getAdminDBConnection();
 
 $sql = "
@@ -24,6 +27,8 @@ while ($row = $result->fetch_assoc()) {
 }
 
 $conn->close();
+
+registrarLog(null, 'LEITURA', "Admin {$adminId} listou usuários no painel.");
 
 echo json_encode($usuarios, JSON_UNESCAPED_UNICODE);
 ?>
