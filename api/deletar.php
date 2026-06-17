@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../cripto.php';
 header('Content-Type: application/json; charset=utf-8');
 
 // Oculta erros visuais e ativa o modo estrito do banco
@@ -12,8 +13,14 @@ try {
         throw new Exception("Método não permitido.");
     }
 
-    // Suporta tanto requisições JSON (Fetch) quanto Formulário Padrão
-    $data = json_decode(file_get_contents('php://input'), true);
+    // Suporta envelope cifrado (criptografia híbrida), JSON puro (Fetch) e Formulário Padrão
+    $payload = json_decode(file_get_contents('php://input'), true);
+
+    if (is_array($payload) && isset($payload['encryptedKey'], $payload['iv'], $payload['encryptedData'])) {
+        $data = Cripto::descriptografarEnvelope($payload);
+    } else {
+        $data = is_array($payload) ? $payload : [];
+    }
 
     $email = trim($data['email'] ?? $_POST['email'] ?? '');
     $senha = trim($data['password'] ?? $_POST['password'] ?? '');

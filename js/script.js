@@ -539,7 +539,9 @@ document.getElementById('ativar-btn')?.addEventListener('click', async function 
     const resetButton = setButtonLoading(this, 'Ativando...');
 
     try {
-        const response = await sendJsonRequest('../api/ativar-2fa.php', { codigo, secret }, true);
+        // Criptografia híbrida (mesmo esquema do cadastro/login)
+        const envelope = await CriptoHibrida.montarEnvelope({ codigo, secret });
+        const response = await sendJsonRequest('../api/ativar-2fa.php', envelope, true);
 
         if (response.success) {
             if (mensagem) {
