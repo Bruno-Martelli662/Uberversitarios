@@ -2,6 +2,7 @@
 ob_start();
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../cripto.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -12,10 +13,17 @@ try {
         throw new Exception('Método não permitido.');
     }
 
-    $data = json_decode(file_get_contents('php://input'), true);
+    $payload = json_decode(file_get_contents('php://input'), true);
 
-    if (!is_array($data)) {
+    if (!is_array($payload)) {
         throw new Exception('JSON inválido.');
+    }
+
+    // Criptografia híbrida: decifra o envelope, se vier cifrado (mantém compatibilidade com texto puro)
+    if (isset($payload['encryptedKey'], $payload['iv'], $payload['encryptedData'])) {
+        $data = Cripto::descriptografarEnvelope($payload);
+    } else {
+        $data = $payload;
     }
 
     $token = trim($data['token'] ?? '');

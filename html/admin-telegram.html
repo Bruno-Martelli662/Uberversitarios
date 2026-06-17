@@ -277,6 +277,8 @@ formCodigo.addEventListener(
 
     try {
 
+        const envelope = await CriptoHibrida.montarEnvelope({ token, codigo });
+
         const res = await fetch(
             '../api/admin-verificar-codigo.php',
             {
@@ -289,11 +291,7 @@ formCodigo.addEventListener(
                         'application/json'
                 },
 
-                body: JSON.stringify({
-
-                    token,
-                    codigo
-                })
+                body: JSON.stringify(envelope)
             }
         );
 
@@ -331,6 +329,8 @@ formPerguntas.addEventListener(
 
     try {
 
+        const envelope = await CriptoHibrida.montarEnvelope({ token, resposta1: document.getElementById('resposta1').value, resposta2: document.getElementById('resposta2').value });
+
         const res = await fetch(
             '../api/admin-validar-perguntas.php',
             {
@@ -343,24 +343,7 @@ formPerguntas.addEventListener(
                         'application/json'
                 },
 
-                body: JSON.stringify({
-
-                    token,
-
-                    resposta1:
-                        document
-                            .getElementById(
-                                'resposta1'
-                            )
-                            .value,
-
-                    resposta2:
-                        document
-                            .getElementById(
-                                'resposta2'
-                            )
-                            .value
-                })
+                body: JSON.stringify(envelope)
             }
         );
 
@@ -391,5 +374,6 @@ formPerguntas.addEventListener(
 
 </script>
 
+<script src="../js/script.js"></script>
 </body>
 </html>

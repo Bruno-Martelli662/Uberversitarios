@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../cripto.php';
 
 header('Content-Type: application/json');
 
@@ -14,10 +15,17 @@ function normalizar($texto) {
 
 try {
 
-    $data = json_decode(
+    $payload = json_decode(
         file_get_contents('php://input'),
         true
     );
+
+    // Criptografia híbrida: decifra o envelope, se vier cifrado
+    if (is_array($payload) && isset($payload['encryptedKey'], $payload['iv'], $payload['encryptedData'])) {
+        $data = Cripto::descriptografarEnvelope($payload);
+    } else {
+        $data = is_array($payload) ? $payload : [];
+    }
 
     $token = trim($data['token'] ?? '');
 

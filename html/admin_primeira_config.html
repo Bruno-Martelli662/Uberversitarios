@@ -99,6 +99,8 @@ form.addEventListener(
 
     try {
 
+        const envelope = await CriptoHibrida.montarEnvelope({ token, resposta1: document.getElementById('resposta1').value, resposta2: document.getElementById('resposta2').value });
+
         const res = await fetch(
             '../api/admin-salvar-perguntas.php',
             {
@@ -111,24 +113,7 @@ form.addEventListener(
                         'application/json'
                 },
 
-                body: JSON.stringify({
-
-                    token,
-
-                    resposta1:
-                        document
-                            .getElementById(
-                                'resposta1'
-                            )
-                            .value,
-
-                    resposta2:
-                        document
-                            .getElementById(
-                                'resposta2'
-                            )
-                            .value
-                })
+                body: JSON.stringify(envelope)
             }
         );
 
@@ -160,5 +145,6 @@ form.addEventListener(
 
 </script>
 
+<script src="../js/script.js"></script>
 </body>
 </html>
