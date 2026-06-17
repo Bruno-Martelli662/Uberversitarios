@@ -69,6 +69,8 @@
         const token = localStorage.getItem('authToken');
       
         try {
+            const envelope = await CriptoHibrida.montarEnvelope({ viagem_id: viagemId });
+
             const response = await fetch('../api/deletar_minha_viagem.php', {
                 method: 'POST',
                 credentials: 'same-origin',
@@ -76,7 +78,7 @@
                     'Content-Type': 'application/json',
                     'Authorization': token
                 },
-                body: JSON.stringify({ viagem_id: viagemId })
+                body: JSON.stringify(envelope)
             });
           
             const data = await response.json();
@@ -92,5 +94,6 @@
         }
     }
   </script>
+<script src="../js/script.js"></script>
 </body>
 </html>
