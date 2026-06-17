@@ -190,6 +190,8 @@ btnEnviar.addEventListener(
         btnEnviar.textContent =
             'Enviando...';
 
+        const envelope = await CriptoHibrida.montarEnvelope({ token });
+
         const res = await fetch(
             '../api/admin-enviar-telegram.php',
             {
@@ -202,9 +204,7 @@ btnEnviar.addEventListener(
                         'application/json'
                 },
 
-                body: JSON.stringify({
-                    token
-                })
+                body: JSON.stringify(envelope)
             }
         );
 
