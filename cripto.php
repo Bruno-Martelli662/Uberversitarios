@@ -198,4 +198,89 @@ class Cripto
         }
         return $msgs ? implode('; ', $msgs) : 'erro desconhecido';
     }
+
+    /* =====================================================================
+     *  S.3.2  —  Criptografia de campos do BD com chave simétrica
+     *  A chave (AES-256) fica protegida por gestão de segredos: gravada
+     *  mascarada (XOR com o poema) no arquivo chave_bd.enc, gerada pelo
+     *  script gerar_chave_bd.php. Aqui só a lemos e usamos.
+     * ================================================================== */
+
+    private static $chaveBD = null;
+
+    /**
+     * Lê a chave simétrica do BD, desmascarando com o poema (mesma gestão de
+     * segredos usada no config.php). Requer que o config.php já tenha sido
+     * carregado (ele define carregarChaveMascara() e aplicarMascaraXor()).
+     */
+    public static function carregarChaveBD(): string
+    {
+        if (self::$chaveBD !== null) {
+            return self::$chaveBD;
+        }
+
+        if (!function_exists('carregarChaveMascara') || !function_exists('aplicarMascaraXor')) {
+            throw new Exception('config.php precisa ser carregado antes de usar a cripto do BD.');
+        }
+
+        $arquivo = __DIR__ . '/chave_bd.enc';
+        if (!is_readable($arquivo)) {
+            throw new Exception('Chave do BD não encontrada (chave_bd.enc). Rode gerar_chave_bd.php.');
+        }
+
+        $mascarado = base64_decode(trim(file_get_contents($arquivo)), true);
+        if ($mascarado === false || $mascarado === '') {
+            throw new Exception('chave_bd.enc inválido.');
+        }
+
+        $poema = carregarChaveMascara();
+        $raw   = aplicarMascaraXor($mascarado, $poema);
+
+        if (strlen($raw) !== 32) {
+            throw new Exception('Chave do BD inválida: esperados 32 bytes, vieram ' . strlen($raw));
+        }
+
+        self::$chaveBD = $raw;
+        return $raw;
+    }
+
+    /**
+     * Cifra um campo para guardar no BD (AES-256-CBC). Guarda IV + ciphertext
+     * em base64, então cada valor cifrado é independente.
+     */
+    public static function cifrarBD(string $plain): string
+    {
+        $key = self::carregarChaveBD();
+        $iv  = openssl_random_pseudo_bytes(16);
+        $ct  = openssl_encrypt($plain, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+
+        if ($ct === false) {
+            throw new Exception('Falha ao cifrar campo do BD: ' . self::erroOpenssl());
+        }
+
+        return base64_encode($iv . $ct);
+    }
+
+    /**
+     * Desfaz cifrarBD: separa o IV (16 bytes) do ciphertext e decifra.
+     */
+    public static function decifrarBD(string $blob): string
+    {
+        $key = self::carregarChaveBD();
+        $bin = base64_decode($blob, true);
+
+        if ($bin === false || strlen($bin) < 17) {
+            throw new Exception('Valor cifrado do BD inválido.');
+        }
+
+        $iv = substr($bin, 0, 16);
+        $ct = substr($bin, 16);
+
+        $plain = openssl_decrypt($ct, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+        if ($plain === false) {
+            throw new Exception('Falha ao decifrar campo do BD: ' . self::erroOpenssl());
+        }
+
+        return $plain;
+    }
 }
