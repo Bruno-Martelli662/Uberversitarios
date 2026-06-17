@@ -1,3 +1,148 @@
+// =====================================================================
+// VERSÃO COMBINADA: cripto.js + script.js em um arquivo só.
+// Assim a cadastro.html precisa apenas de <script src="../js/script.js">
+// (não precisa de tag separada para o cripto.js).
+// =====================================================================
+
+// =====================================================================
+//  cripto.js  —  Criptografia híbrida no front (Web Crypto API)
+// =====================================================================
+//  Esquema: chave de sessão simétrica (AES-256-CBC) protegida pela
+//  chave pública do servidor (RSA-OAEP).
+//
+//  Passos (batem com os requisitos S.3.1.*):
+//    a) obterChavePublica()   -> pega o "certificado"/chave pública do back
+//    b) gerarChaveSessao()    -> gera a chave AES-256 no front
+//    c) cifrarChaveSessao()   -> cifra a chave AES com a pública (RSA-OAEP)
+//    d) cifrarDados()         -> cifra os dados do form com a chave AES
+//    e) (os dados já saem cifrados no corpo do POST)
+//
+//  Cada passo imprime no console exatamente o que você precisa printar.
+//
+//  Observação: window.crypto.subtle só existe em "secure context"
+//  (https:// ou http://localhost). O projeto já roda em https://localhost,
+//  então está ok.
+// =====================================================================
+
+const CriptoHibrida = (() => {
+    const ENDPOINT_CHAVE = '../api/chave-publica.php';
+
+    // ArrayBuffer -> base64
+    function paraBase64(buffer) {
+        const bytes = new Uint8Array(buffer);
+        let bin = '';
+        for (let i = 0; i < bytes.length; i++) {
+            bin += String.fromCharCode(bytes[i]);
+        }
+        return btoa(bin);
+    }
+
+    // PEM -> ArrayBuffer (tira cabeçalho/rodapé e quebras de linha)
+    function pemParaArrayBuffer(pem) {
+        const corpo = pem
+            .replace(/-----BEGIN [^-]+-----/, '')
+            .replace(/-----END [^-]+-----/, '')
+            .replace(/\s+/g, '');
+        const bin = atob(corpo);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) {
+            bytes[i] = bin.charCodeAt(i);
+        }
+        return bytes.buffer;
+    }
+
+    // ---- S.3.1.a : obtém a chave pública (certificado) do servidor ----
+    async function obterChavePublica() {
+        const resp = await fetch(ENDPOINT_CHAVE, { credentials: 'same-origin' });
+        const json = await resp.json();
+
+        if (!json.success) {
+            throw new Error(json.message || 'Falha ao obter a chave pública.');
+        }
+
+        console.log('%c[S.3.1.a] Certificado / chave pública recebida do servidor:',
+            'color:#2563eb;font-weight:bold');
+        console.log(json.chavePublica);
+
+        // Importa para uso com RSA-OAEP. hash:'SHA-1' para casar com o PHP
+        // (OPENSSL_PKCS1_OAEP_PADDING usa SHA-1).
+        return crypto.subtle.importKey(
+            'spki',
+            pemParaArrayBuffer(json.chavePublica),
+            { name: 'RSA-OAEP', hash: 'SHA-1' },
+            true,
+            ['encrypt']
+        );
+    }
+
+    // ---- S.3.1.b : gera a chave de sessão (AES-256) no front ----
+    async function gerarChaveSessao() {
+        const chave = await crypto.subtle.generateKey(
+            { name: 'AES-CBC', length: 256 },
+            true,
+            ['encrypt', 'decrypt']
+        );
+        const raw = await crypto.subtle.exportKey('raw', chave);
+
+        console.log('%c[S.3.1.b] Chave de sessão AES-256 gerada no front:',
+            'color:#16a34a;font-weight:bold');
+        console.log('Base64:', paraBase64(raw), '(' + raw.byteLength + ' bytes)');
+
+        return { chave, raw };
+    }
+
+    // ---- S.3.1.c : cifra a chave de sessão com a pública (RSA-OAEP) ----
+    async function cifrarChaveSessao(rawAes, chavePublica) {
+        const cifrada = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, chavePublica, rawAes);
+        const base64 = paraBase64(cifrada);
+
+        console.log('%c[S.3.1.c] Chave de sessão cifrada com a pública (vai para o back):',
+            'color:#9333ea;font-weight:bold');
+        console.log(base64);
+
+        return base64;
+    }
+
+    // ---- S.3.1.d/e : cifra os dados do form com a chave de sessão ----
+    async function cifrarDados(objeto, chaveSessao) {
+        const iv = crypto.getRandomValues(new Uint8Array(16));
+        const claro = new TextEncoder().encode(JSON.stringify(objeto));
+        const cifrado = await crypto.subtle.encrypt({ name: 'AES-CBC', iv }, chaveSessao, claro);
+
+        return {
+            iv: paraBase64(iv),
+            encryptedData: paraBase64(cifrado)
+        };
+    }
+
+    // Orquestra a-e e devolve o envelope pronto para enviar.
+    async function montarEnvelope(dadosForm) {
+        const chavePublica          = await obterChavePublica();              // a
+        const { chave, raw }        = await gerarChaveSessao();               // b
+        const encryptedKey          = await cifrarChaveSessao(raw, chavePublica); // c
+        const { iv, encryptedData } = await cifrarDados(dadosForm, chave);    // d
+
+        const envelope = { encryptedKey, iv, encryptedData };
+
+        console.log('%c[S.3.1.d/e] Envelope cifrado que vai no corpo do POST (aba Network):',
+            'color:#dc2626;font-weight:bold');
+        console.log(JSON.parse(JSON.stringify(envelope)));
+
+        return envelope;
+    }
+
+    return {
+        montarEnvelope,
+        obterChavePublica,
+        gerarChaveSessao,
+        cifrarChaveSessao,
+        cifrarDados
+    };
+})();
+
+console.log('cripto.js carregado (criptografia híbrida RSA-OAEP + AES-256-CBC).');
+
+
 // ==================== SCRIPT.JS LIMPO ====================
 // Cadastro, login, recuperação de senha e 2FA
 // =========================================================
@@ -147,7 +292,12 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
         formData.termosAceitos = true;
         formData.dataAceiteTermos = new Date().toISOString();
 
-        const response = await sendJsonRequest('../api/cadastrar.php', formData);
+        // ---- Criptografia híbrida (S.3.1) ----
+        // Em vez de enviar o formData em texto, montamos o envelope
+        // { encryptedKey, iv, encryptedData } com chave de sessão sobre a pública.
+        const envelope = await CriptoHibrida.montarEnvelope(formData);
+
+        const response = await sendJsonRequest('../api/cadastrar.php', envelope);
 
         if (response.success) {
             alert('Cadastro realizado com sucesso! Verifique seu e-mail para confirmar.');
@@ -200,7 +350,9 @@ document.getElementById('loginForm')?.addEventListener('submit', async function 
     try {
         formData.senha = hashSenha(formData.senha);
 
-        const response = await sendJsonRequest('../api/login.php', formData);
+        // Criptografia híbrida (mesmo esquema do cadastro)
+        const envelope = await CriptoHibrida.montarEnvelope(formData);
+        const response = await sendJsonRequest('../api/login.php', envelope);
 
         if (response.success) {
             if (response.token) {
@@ -304,7 +456,9 @@ document.getElementById('newPasswordForm')?.addEventListener('submit', async fun
         formData.novaSenha = hashSenha(formData.novaSenha);
         delete formData.confirmarNovaSenha;
 
-        const response = await sendJsonRequest('../api/nova-senha.php', formData);
+        // Criptografia híbrida (mesmo esquema do cadastro)
+        const envelope = await CriptoHibrida.montarEnvelope(formData);
+        const response = await sendJsonRequest('../api/nova-senha.php', envelope);
 
         if (response.success) {
             showSuccess("Senha alterada com sucesso! Redirecionando...");

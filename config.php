@@ -7,6 +7,44 @@ header("Content-Type: application/json; charset=UTF-8");
 
 date_default_timezone_set('America/Sao_Paulo');
 
+/**
+ * Lê o poema que serve de chave para a máscara XOR dos segredos.
+ * É o mesmo arquivo usado pelo reescreve.py ao esconder os segredos.
+ */
+function carregarChaveMascara() {
+    $arquivo = __DIR__ . '/poema.txt';
+
+    if (!file_exists($arquivo)) {
+        $arquivo = __DIR__ . '/../poema.txt';
+    }
+
+    if (!file_exists($arquivo)) {
+        error_log("Arquivo poema.txt (chave da máscara) não encontrado.");
+        die(json_encode([
+            'success' => false,
+            'message' => 'Configuração inválida.'
+        ]));
+    }
+
+    return file_get_contents($arquivo);
+}
+
+/**
+ * Máscara XOR: aplica (e desfaz, pois XOR é simétrico) a chave sobre os dados,
+ * repetindo o poema até cobrir todo o conteúdo. Em PHP o operador ^ entre
+ * strings já faz XOR byte a byte, então montamos o keystream do mesmo tamanho.
+ */
+function aplicarMascaraXor($dados, $chave) {
+    if ($chave === '' || $chave === false || $dados === '') {
+        return $dados;
+    }
+
+    $repeticoes = (int) ceil(strlen($dados) / strlen($chave));
+    $keystream  = substr(str_repeat($chave, $repeticoes), 0, strlen($dados));
+
+    return $dados ^ $keystream;
+}
+
 function carregarConfiguracaoSecreta() {
     $arquivo = __DIR__ . '/logo_projeto.png';
 
@@ -37,7 +75,12 @@ function carregarConfiguracaoSecreta() {
     $posDados = $posIend + 8;
     $dados = substr($conteudo, $posDados);
 
-    $config = json_decode(base64_decode($dados), true);
+    // 1) tira o base64  2) remove a máscara XOR usando o poema como chave
+    $mascarado = base64_decode($dados);
+    $poema = carregarChaveMascara();
+    $json = aplicarMascaraXor($mascarado, $poema);
+
+    $config = json_decode($json, true);
 
     if (!is_array($config)) {
         error_log("Falha ao decodificar configuração esteganografada.");
@@ -444,7 +487,5 @@ function exigirUsuarioLogado() {
     $conn->close();
 
     return (int)$sessao['usuario_id'];
-}
-?>
-
+}?>
 

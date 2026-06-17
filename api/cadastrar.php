@@ -2,6 +2,7 @@
 ob_start();
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../cripto.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -19,10 +20,25 @@ try {
         throw new Exception('Método não permitido.');
     }
 
-    $data = json_decode(file_get_contents('php://input'), true);
+    $payload = json_decode(file_get_contents('php://input'), true);
 
-    if (!is_array($data)) {
+    if (!is_array($payload)) {
         throw new Exception('JSON inválido ou vazio.');
+    }
+
+    // ---- Criptografia híbrida (S.3.1) ----
+    // Se chegou o envelope { encryptedKey, iv, encryptedData }, o servidor:
+    //   1) decifra a chave de sessão com a chave privada (RSA-OAEP)
+    //   2) decifra os dados do formulário com a chave de sessão (AES-256-CBC)
+    // Mantém suporte a texto puro (modo legado) para não quebrar testes antigos.
+    if (isset($payload['encryptedKey'], $payload['iv'], $payload['encryptedData'])) {
+        $data = Cripto::descriptografarEnvelope($payload);
+
+        // S.3.1.f: mostra na "janela de console" do back os dados já decifrados,
+        // no formato  usuario:hostname>mensagem
+        Cripto::logConsole('Cadastro descriptografado: ' . json_encode($data, JSON_UNESCAPED_UNICODE));
+    } else {
+        $data = $payload; // modo legado (sem criptografia)
     }
 
     error_log("Dados recebidos: " . json_encode(array_diff_key($data, ['senha' => ''])));
