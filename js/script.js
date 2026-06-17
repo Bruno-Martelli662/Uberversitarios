@@ -406,7 +406,8 @@ document.getElementById('recoverForm')?.addEventListener('submit', async functio
     const resetButton = setButtonLoading(submitButton, 'Enviando...');
 
     try {
-        const response = await sendJsonRequest('../api/recuperar-senha.php', { email });
+        const envelope = await CriptoHibrida.montarEnvelope({ email });
+        const response = await sendJsonRequest('../api/recuperar-senha.php', envelope);
 
         alert(response.success ? response.message : response.message || "Erro ao solicitar recuperação.");
     } catch (error) {
@@ -486,7 +487,8 @@ document.getElementById('resend-link')?.addEventListener('click', async function
     if (!email) return;
 
     try {
-        const response = await sendJsonRequest('../api/reenviar-confirmacao.php', { email });
+        const envelope = await CriptoHibrida.montarEnvelope({ email });
+        const response = await sendJsonRequest('../api/reenviar-confirmacao.php', envelope);
 
         alert(response.success ? "E-mail reenviado!" : response.message || "Erro ao reenviar.");
     } catch (error) {
