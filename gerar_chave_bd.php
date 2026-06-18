@@ -1,6 +1,6 @@
 <?php
 /**
- * gerar_chave_bd.php  —  S.3.2.a + S.3.2.b
+ * gerar_chave_bd.php
  * ----------------------------------------
  * Gera a chave simétrica (AES-256) usada para cifrar campos sensíveis do BD
  * e a guarda PROTEGIDA por gestão de segredos: mascarada com XOR sobre o
@@ -9,8 +9,6 @@
  * Rode no terminal do servidor (assim o log cai no console):
  *     /opt/lampp/bin/php gerar_chave_bd.php
  *
- * S.3.2.a -> imprime a chave gerada (base64)
- * S.3.2.b -> loga a operação de armazenamento no formato usuario:hostname>...
  *
  * Rode UMA vez (ou ao rotacionar a chave). Se você apagar/rotacionar a chave,
  * os dados já gravados com a chave antiga deixam de decifrar.

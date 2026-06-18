@@ -9,8 +9,8 @@ date_default_timezone_set('America/Sao_Paulo');
 
 /**
  * Lê o poema que serve de chave para a máscara XOR dos segredos.
- * É o mesmo arquivo usado pelo reescreve.py ao esconder os segredos.
- */
+
+*/
 function carregarChaveMascara() {
     $arquivo = __DIR__ . '/poema.txt';
 
