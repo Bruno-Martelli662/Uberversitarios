@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../cripto.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -19,6 +20,8 @@ $result = $conn->query($sql);
 $viagens = [];
 
 while ($row = $result->fetch_assoc()) {
+    // S.3.2: nome do motorista vem cifrado -> decifra
+    $row['motorista_nome'] = Cripto::decifrarBDSeguro($row['motorista_nome']);
     $viagens[] = $row;
 }
 

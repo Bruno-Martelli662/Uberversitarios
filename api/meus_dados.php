@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../cripto.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $token = trim($_GET['token'] ?? '');
@@ -27,6 +28,11 @@ $stmt->bind_param("i", $usuario_id);
 $stmt->execute();
 $dados_pessoais = $stmt->get_result()->fetch_assoc();
 $stmt->close();
+
+// S.3.2: nome vem cifrado do BD -> decifra (tolerante a registros antigos em texto)
+if ($dados_pessoais) {
+    $dados_pessoais['nome_usuario'] = Cripto::decifrarBDSeguro($dados_pessoais['nome_usuario']);
+}
 
 $connRead = getReadDBConnection();
 $stmtViagens = $connRead->prepare("SELECT id, origem, destino, veiculo, criada_em FROM viagens WHERE motorista_id = ?");

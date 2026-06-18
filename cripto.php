@@ -283,4 +283,21 @@ class Cripto
 
         return $plain;
     }
+
+    /**
+     * Versão tolerante de decifrarBD: se o valor não for um campo cifrado
+     * válido (ex.: registros antigos gravados em texto puro, antes da S.3.2),
+     * devolve o valor original em vez de lançar erro. Use ao LER do BD.
+     */
+    public static function decifrarBDSeguro(?string $valor): ?string
+    {
+        if ($valor === null || $valor === '') {
+            return $valor;
+        }
+        try {
+            return self::decifrarBD($valor);
+        } catch (\Throwable $e) {
+            return $valor; // valor legado em texto puro
+        }
+    }
 }

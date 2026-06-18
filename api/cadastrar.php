@@ -105,6 +105,12 @@ try {
 
     $tokenConfirmacao = gerarToken();
 
+    // ---- S.3.2.c: cifra o dado sensível antes de gravar no BD ----
+    // nome_usuario vai cifrado (AES-256, chave protegida por gestão de segredos).
+    // email e telefone ficam em texto: são chaves de busca (login por email e
+    // localização do motorista por telefone no cadastro de viagem). senha já é hash.
+    $nomeCifrado = Cripto::cifrarBD($nome);
+
     $stmt = $conn->prepare("
         INSERT INTO usuarios 
         (nome_usuario, email, telefone, senha_hash, token_confirmacao) 
@@ -115,7 +121,7 @@ try {
         throw new Exception('Erro na preparação da inserção: ' . $conn->error);
     }
 
-    $stmt->bind_param("sssss", $nome, $email, $telefone, $senhaHash, $tokenConfirmacao);
+    $stmt->bind_param("sssss", $nomeCifrado, $email, $telefone, $senhaHash, $tokenConfirmacao);
     
     if (!$stmt->execute()) {
         error_log("Erro SQL ao inserir usuário: " . $stmt->error);
@@ -124,6 +130,27 @@ try {
 
     $userId = $conn->insert_id;
     $stmt->close();
+
+    // ---- S.3.2.d: relê do BD, decifra e mostra no console ----
+    // (prova o ciclo cifrar -> gravar -> ler -> decifrar)
+    $stmtLeitura = $conn->prepare("SELECT nome_usuario, email, telefone FROM usuarios WHERE id = ?");
+    if ($stmtLeitura) {
+        $stmtLeitura->bind_param("i", $userId);
+        $stmtLeitura->execute();
+        $resLeitura = $stmtLeitura->get_result();
+
+        if ($linha = $resLeitura->fetch_assoc()) {
+            $nomeDec = Cripto::decifrarBD($linha['nome_usuario']);
+
+            Cripto::logConsole(
+                'informações do cadastro: nome=' . $nomeDec .
+                ', email=' . $linha['email'] .
+                ', telefone=' . $linha['telefone'] . ' (id=' . $userId . ')'
+            );
+        }
+
+        $stmtLeitura->close();
+    }
     
     // REGISTRO DO LOG AQUI
     registrarLog($userId, 'ESCRITA', "Novo usuário cadastrado com e-mail: $email");

@@ -72,6 +72,9 @@ try {
     }
 
     $usuario = $result->fetch_assoc();
+    if ($usuario) {
+        $usuario['nome_usuario'] = Cripto::decifrarBDSeguro($usuario['nome_usuario']);
+    }
     $stmt->close();
 
     if ($senhaHash !== $usuario['senha_hash']) {

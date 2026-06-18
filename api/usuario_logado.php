@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../cripto.php';
 header('Content-Type: application/json');
 
 $token = trim($_GET['token'] ?? '');
@@ -24,7 +25,7 @@ $stmt->close();
 $conn->close();
 
 if ($user) {
-    echo json_encode(['success' => true, 'nome' => $user['nome_usuario'], 'telefone' => $user['telefone']]);
+    echo json_encode(['success' => true, 'nome' => Cripto::decifrarBDSeguro($user['nome_usuario']), 'telefone' => $user['telefone']]);
 } else {
     http_response_code(401);
     echo json_encode(['error' => 'Token inválido ou expirado']);

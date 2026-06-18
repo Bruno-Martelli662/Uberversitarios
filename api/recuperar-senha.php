@@ -66,6 +66,9 @@ try {
     }
 
     $usuario = $result->fetch_assoc();
+    if ($usuario) {
+        $usuario['nome_usuario'] = Cripto::decifrarBDSeguro($usuario['nome_usuario']);
+    }
     $stmt->close();
 
     $tokenRecuperacao = gerarToken();

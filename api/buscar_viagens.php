@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../cripto.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -37,7 +38,7 @@ try {
     while ($viagem = $result->fetch_assoc()) {
         $viagens[] = [
             'id' => $viagem['id'],
-            'motorista' => $viagem['motorista_nome'],
+            'motorista' => Cripto::decifrarBDSeguro($viagem['motorista_nome']),
             'origem' => $viagem['origem'],
             'destino' => $viagem['destino'],
             'veiculo' => $viagem['veiculo'],
